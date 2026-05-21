@@ -3,6 +3,16 @@
 *Working scoping document. Amazon-style PR/FAQ. NOT a paper yet. Written 2026-05-21 by Bhai with Bill in the loop. Status: WIP. Owner: Bill.*
 
 > **Terminology:** **DSD** = **Declarative Software Development**. The practice of composing software from a registry of proven, openly-documented patterns ("archetypes") rather than re-implementing those patterns from scratch each time. The DSD acronym is chosen to avoid collision with SDD (Software Design Document, System Design Document) which are already widely used.
+>
+> **DSD does not stand alone.** It is the substrate-composition half of a closed loop with two companion methodologies:
+>
+> - **SIG** — the Solution Intelligence Graph. The structured artifact that captures *what a solution is*: its capabilities, requirements, evidence, interfaces, themes, and the way they connect. See `knowledge/papers/SOLUTION-INTELLIGENCE-GRAPH.md`.
+> - **SDD** — SIG-Driven Development. The methodology for designing and building a specific project against its SIG. Story-forces-handoff-protocols; name-everything; the SIG is the spec. See `knowledge/papers/SIG-DRIVEN-DEVELOPMENT.md`.
+> - **DSD** — Declarative Software Development (this document). The methodology for composing the substrate that SDD then builds within.
+>
+> The loop: **DSD selects and composes the substrate → the SIG specifies the solution → SDD designs and builds the project within the substrate.** Each output feeds the others. DSD addresses *how the architecture itself gets composed from proven patterns*; SDD addresses *how you design a specific project once you've chosen its architecture*; the SIG is the artifact both methodologies operate against.
+>
+> The full thesis is the union. This PR/FAQ focuses on DSD because it is the new coinage; the seminal paper, when written, will likely treat SIG + SDD + DSD as a unified theory of solution composition.
 
 ---
 
@@ -202,6 +212,54 @@ The PR claims things that aren't true today. Specifically:
 - **"Anyone can add archetypes"** — true once the registry has its first external contributor
 
 The PR will be true by Q3-Q4 2026 if the current trajectory holds. The point of writing it now is to know what we're aiming at.
+
+### The closed loop: SIG + SDD + DSD
+
+This PR/FAQ scopes DSD specifically. The bigger frame, which the eventual seminal paper will likely treat in full:
+
+```
+              ┌─────────────────────────────────────────────────────┐
+              │                  THE CLOSED LOOP                    │
+              │                                                     │
+              │    DSD              SIG              SDD            │
+              │  composes  ───→   specifies   ───→  builds          │
+              │  the                the                 within      │
+              │  substrate          solution            substrate   │
+              │                                                     │
+              │     ▲                                       │       │
+              │     │           findings + drift            │       │
+              │     └───────────────────────────────────────┘       │
+              └─────────────────────────────────────────────────────┘
+```
+
+Reading it forward:
+
+1. **DSD** — given a declarative intent ("build me a secure web app fronting a SIG blackboard"), the orchestrator composes archetypes from the registry into a substrate. Auth comes from `simple-auth`; eventing from `events-spine`; blackboard from `blackboard`; etc. The substrate is composed, marked, and adopted.
+2. **SIG** — the project's Solution Intelligence Graph is built (or pre-existed) and captures *what this specific solution does*: capabilities, requirements, evidence, interfaces, themes, the way they connect. The SIG is the spec for the project that lives inside the DSD-composed substrate.
+3. **SDD** — story-forces-handoff-protocols pulled from the SIG; name-everything driven by the graph nodes and edges; modules designed against the SIG; the project gets built within the substrate the SIG composed.
+
+Reading it backward (the feedback half):
+
+- The findings from each SDD-built project update the SIG (drift, new requirements, new evidence)
+- The findings from each DSD adoption update archetypes (new defects, new compositions, refinements)
+- Patterns recognized across many SIGs and many adoptions promote into new archetypes
+
+What's covered by the loop:
+
+- Auth, audit logs, event buses, graph rendering, NL interfaces, agent orchestration, UI scaffolds, integration plumbing, deployment patterns, observability
+- Solution specification (the SIG handles this)
+- Project design (SDD handles this)
+- Substrate composition (DSD handles this)
+- Continuous refinement of all three (the feedback loop)
+
+What's NOT covered:
+
+- Genuinely novel research code (no archetypes because no one's solved this class before)
+- Throwaway scripts where the overhead exceeds the work
+- The judgment about *what solution to attempt* (upstream of all three)
+- Visual/UX design choices (DSD composes a UI scaffold but doesn't decide dropdown vs. search field)
+
+The "almost" in "almost anything in software development" lives in that small list. Everything else — the bulk of how software actually gets built today — is in scope.
 
 ### What this PR/FAQ doesn't cover (yet)
 
