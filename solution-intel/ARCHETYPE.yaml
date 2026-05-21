@@ -1,0 +1,45 @@
+name: solution-intel
+kind: composite
+status: stub
+description: >
+  The flagship Solution Intelligence substrate. Every project adopts solution-intel
+  first to host its own SIG and run the declarative-SDD loop. Composes identity,
+  audit, eventing, graph, and (eventually) NL chat + agents + orchestrator into a
+  coherent substrate. The archetypes registry itself will adopt this archetype on
+  itself once it is feature-complete, becoming the first self-hosted project.
+
+reference_languages:
+  primary: typescript
+  available_translations: []
+
+composes:
+  - simple-auth
+  - simple-ledger    # via chainblocks; Stage 3 makes this concrete
+  - events-spine     # Stage 2d adopts this into SI
+  - graph-db         # via polygraph
+  - nl-chat-substrate
+
+reference_impl:
+  in_tree: false
+  pointer_repos:
+    - https://github.com/wfredricks/solution-intelligence-identity
+    - https://github.com/wfredricks/solution-intelligence-cli
+    - https://github.com/wfredricks/solution-intelligence-graph-client
+    - https://github.com/wfredricks/solution-intelligence-graph  # pending Stage 3
+
+adopters: []  # populated when the archetypes registry adopts solution-intel on itself
+
+defects_known: []  # back-filled at full lift from all SI build findings
+
+trigger_conditions_for_full_lift:
+  - solution-intelligence-identity at >=0.2.0-pre  # ✅
+  - solution-intelligence-cli at >=0.2.0-pre        # ✅
+  - solution-intelligence-graph-client at >=0.1.0-pre  # ✅
+  - solution-intelligence-graph shipped (Stage 3)  # ⏳
+  - events-spine adopted into SI/I (Stage 2d)      # ⏳
+
+future_compositions_to_recognize:
+  - cli-shell-pattern         # may become its own archetype
+  - graph-client-server-split # may become its own archetype
+  - workspace-config-convention
+  - orchestrator              # certainly its own archetype eventually

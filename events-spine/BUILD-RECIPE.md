@@ -19,6 +19,8 @@
 
 Build the reference implementation for events-spine v0.1.0-pre. Scaffold the four composed-archetype directories. Commit, tag, GitHub release.
 
+**Note on the larger composition:** events-spine is itself a future component of the `solution-intel` flagship composite archetype (see `archetypes/solution-intel/ARCHETYPE.md`). Design boundaries so events-spine composes cleanly into solution-intel later — no over-coupling to the SI runtime's specifics, no assumptions about being deployed alongside other SI components. events-spine should work as a standalone composite *and* compose into solution-intel without modification.
+
 **In scope:**
 - Create `archetypes/events-spine/reference-impl/` with the full TypeScript reference
 - Create sibling archetype directories: `simple-pubsub/`, `simple-subscriber/`, `scribe/`, `mcp-proxy/` (each with its own ARCHETYPE.md + ARCHETYPE.yaml + reference-impl pointer back to events-spine/reference-impl/)

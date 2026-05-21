@@ -41,6 +41,8 @@ The PR is written *as if shipping today*. It isn't. Two-thirds of what the PR cl
 
 This is not low-code. Low-code hides the implementation behind a vendor's widgets; DSD exposes the implementation, marks every line with its origin, and gives the adopter complete ownership of their derivation. Low-code traps you in a tool; archetypes give you a starting point you can fully read, modify, and own.
 
+**The flagship archetype is `solution-intel`** — the Solution Intelligence substrate every project adopts first to host its own SIG. After adopting solution-intel, the project's other archetype adoptions (events-spine, simple-auth, blackboard, etc.) express their contracts as nodes in the project's SIG. The orchestrator reads the SIG to compose, verify, and operate.
+
 **What ships today** *(written in the future tense, pre-orchestrator)*:
 
 - **An open archetypes registry** at `github.com/wfredricks/archetypes`. Currently \[N\] archetypes, including `simple-auth`, `simple-ledger`, `graph-db`, `events-spine`, `blackboard`, and `nl-chat-substrate`. Each archetype has a pattern description, a composition specification (for composite archetypes), an adoption recipe, a defects list, and a list of adopters. Composition allows complex archetypes to be built from primitives, so the registry scales without devolving into a flat catalog.
