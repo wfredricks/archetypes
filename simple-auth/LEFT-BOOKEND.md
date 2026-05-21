@@ -1,3 +1,9 @@
+---
+archetypeName: simple-auth
+archetypeKind: primitive
+archetypeVersion: lifted-2026-05-20
+---
+
 # simple-auth — Left Bookend (Retroactive)
 
 *Reconstructed left-bookend for the `simple-auth` archetype. Written 2026-05-21, after the fact, as part of the bookend-discipline rollout. The original work (bangauth → SI/I Stage 2a) happened 2026-05-20 without a formal left bookend.*
@@ -111,21 +117,51 @@ Parallel to C4. The audit ledger is an interface. Canonical is chainblocks; JSON
 
 ## Services (the contract surface)
 
-Six services were committed (reconstructed from bangauth's exports + SI/I's usage):
+Six services were committed (reconstructed from bangauth's exports + SI/I's usage). Item form added 2026-05-21 to match the canonical bookend shape used by `events-spine`.
 
-- **`requestCode(email)`** → issues an HMAC code, dispatches to the email adapter
-- **`verifyCode(email, code)`** → verifies; returns a bearer token on success
-- **`verifyToken(token)`** → verifies a bearer token locally using the shared key store
-- **`grants` (HTTP router)** → mountable Hono router for grant/revoke endpoints
-- **`getAuthKeyStore()` / `getConfig()`** → accessors for peer services
-- **Audit emitter interface** → pluggable contract for the ledger
+### S1: `requestCode(email)`
+
+Issues an HMAC code derived from `(email, month, key)`, dispatches to the email adapter.
+
+### S2: `verifyCode(email, code)`
+
+Verifies the code; returns a bearer token on success.
+
+### S3: `verifyToken(token)`
+
+Verifies a bearer token locally using the shared key store. No network call to the identity service.
+
+### S4: `grants` (HTTP router)
+
+Mountable Hono router for grant/revoke endpoints. Adopters mount under any prefix.
+
+### S5: `getAuthKeyStore()` / `getConfig()`
+
+Accessors exported for peer services that need to verify tokens locally.
+
+### S6: Audit emitter interface
+
+Pluggable contract for the ledger backend (chainblocks canonical; JSONL fallback for dev/tests).
 
 ## DataObjects
 
-- `AuthCode` — `{ email, code, expiresAt }`
-- `Token` — opaque string; HMAC over `(email, month, key)`; verifiable locally
-- `Grant` — `{ subject, principal, action, resource, audit_block_seq }`
-- `AuditEntry` — append-only, sequence-numbered
+Named as DataObjects retroactively (the SIG ontology did not have DataObject at lift time — see the SIG ArchiMate ontology backlog item).
+
+### DO1: `AuthCode`
+
+Shape: `{ email, code, expiresAt }`. Per-request HMAC; no persistent code database.
+
+### DO2: `Token`
+
+Opaque string; HMAC over `(email, month, key)`; verifiable locally given the shared key store.
+
+### DO3: `Grant`
+
+Shape: `{ subject, principal, action, resource, audit_block_seq }`. Stored append-only via the audit emitter.
+
+### DO4: `AuditEntry`
+
+Append-only, sequence-numbered ledger entry emitted on every state change.
 
 These were not formally named as DataObjects at lift time (the SIG ontology didn't have DataObject yet — see the SIG ArchiMate ontology backlog item for tonight's work). They are named now.
 
