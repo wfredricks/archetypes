@@ -108,6 +108,35 @@ at the project root declaring:
 The adopter's `ARCHETYPE.md` is the *project-local* twin of this registry's
 description. They cross-reference each other.
 
+### Archetype-owned vs. adopter-owned: what stays and what changes
+
+During adoption, the adopter answers `@adopt:` markers and substitutes adopter-namespace values for the archetype's defaults. But not everything in the archetype's reference-impl gets renamed. The line between archetype-owned and adopter-owned is load-bearing.
+
+**Archetype-owned (stays verbatim at adoption):**
+
+- **Class names** — `SIIdentityClient`, `SIHttpError`, `KeyStore`, etc. The class is part of the archetype's contract surface; renaming it would diverge the adopter from the contract.
+- **Type and interface names** — `Publisher`, `Subscriber`, `ScribeEvent`, etc. Same reasoning.
+- **Inner config keys** — in a config file at `.asi/config.yaml`, the directory `.asi/` carries the adopter's namespace, but the YAML key `si:` carries the archetype's contract shape. The adopter renames the container, not the content.
+- **Subject-naming structure** — the *pattern* `<service>.<entity>.<action>` is archetype-owned; the *prefix* (`si.` vs. `asi.`) is the adopter's namespace. Pattern stays; prefix swaps.
+- **API endpoint shapes** — `/login`, `/grants/:id`, etc. The route names are the archetype's contract; the mount prefix (`/auth`, `/asi`) is the adopter's.
+- **Function and method names** — `verifyToken`, `createPublisher`, etc.
+
+**Adopter-owned (changes at adoption per markers):**
+
+- Package scope (`@solution-intelligence/*` → `@asi/*`)
+- Binary names (`si` → `asi`)
+- Default ports (3001 → 3101)
+- Default file paths (`~/.si/` → `~/.asi/`)
+- Env var prefix (`SI_*` → `ASI_*`)
+- Subject prefixes (`si.identity.*` → `asi.identity.*`)
+- API path prefix (`/auth` → `/asi/auth`)
+- Project title, display name, documentation branding
+- Composition choices at each `@adopt:composes:<role>` marker
+
+**Heuristic:** if a value would change the *contract surface* visible to peer code, it is archetype-owned. If it would change *how the adoption identifies itself in the world* (logs, paths, namespaces, identifiers in the operator's environment), it is adopter-owned. When in doubt, leave it archetype-owned; the next adoption will surface a `@adopt:` marker if a customization point was missed.
+
+Learned 2026-05-21 from the `archetypes-solution-intelligence` adoption (first end-to-end adoption of `solution-intel`).
+
 ### What does NOT get marked
 
 - **Referenced concepts.** If your code *talks about* a pattern (e.g. mentions
