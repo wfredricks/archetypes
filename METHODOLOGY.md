@@ -227,6 +227,64 @@ Archetypes only work if their owners maintain them.
 Skipping maintenance is the failure mode that turns a clean archetype into dead
 code. The methodology is non-negotiable on this point.
 
+## Bookends
+
+Every archetype — native or lifted — gets a **pair of bookend artifacts** that bracket the work.
+
+### What a bookend is
+
+A bookend is a structured commitment-or-comparison document. The **left bookend** is written *before* the build and captures intent, scope, principles, constraints, services, hypotheses. The **right bookend** is written *after* the build (or after the first adoption) and compares each hypothesis from the left bookend against what actually happened.
+
+Bookends are the discipline that forces the writer to commit to a hypothesis before discovering whether reality agrees. They are the structural counterpart to story-papers: where stories make the *picture* visible, bookends make the *commitments* visible.
+
+### Two files per archetype
+
+- **`LEFT-BOOKEND.md`** — the spec. Principles, Constraints, Services, Processes, DataObjects, Compositions, hypotheses to test.
+- **`RIGHT-BOOKEND.md`** — the comparison. One pass per hypothesis: held, partially held, violated. Surprises (things not in the left bookend that emerged). Updates the right bookend triggers.
+
+For native archetypes, both bookends are written in sequence: left before code, right after first adoption.
+
+For lifts (archetypes adopted into the registry after the work was already done), the bookends are **retroactive**. The right bookend is grounded in artifacts (FINDINGS, build plans, git history); the left bookend is reconstructed from those artifacts and is honest about what could and could not be recovered. See `simple-auth/LEFT-BOOKEND.md` for the first example.
+
+### Companion: story-papers
+
+For archetypes that warrant it, a **`STORY.md`** sits beside the bookends — a story-paper that frames the archetype as a lived experience. `events-spine/STORY.md` is the first example (the market-square + newspaper-reporter framing). Stories are optional; bookends are mandatory.
+
+Stories surface insights bookends miss. The events-spine STORY surfaced four SIG ontology gaps (posture, contract direction, workflow cadence, temporal coupling) that the structural framing of a left bookend alone would not have made visible. The story / bookend pair complements: the story renders the architecture as lived experience; the bookend captures the commitments.
+
+### Lifecycle: native vs. lift
+
+**Native archetype lifecycle** (the canonical discipline):
+
+1. STORY.md — if a metaphor or lived-experience framing pays its rent
+2. LEFT-BOOKEND.md — spec; principles, constraints, services, hypotheses
+3. BUILD-RECIPE.md — mechanical recipe for the sub-agent
+4. Reference implementation — sub-agent execution against the recipe
+5. First adoption (a real consuming project, e.g. SI/I)
+6. RIGHT-BOOKEND.md — compare hypotheses against reality
+7. DEFECTS.md update — fold defects discovered during adoption back
+
+**Lift lifecycle** (for archetypes recognized post-hoc):
+
+1. Identify the upstream library (existing reference implementation)
+2. Identify the first adoption (existing consuming project)
+3. ARCHETYPE.md, ARCHETYPE.yaml, ADOPTION-RECIPE.md, DEFECTS.md, ADOPTIONS.md (registry boilerplate)
+4. **Retroactive bookends** — right bookend grounded in artifacts; left bookend reconstructed and honest about gaps
+5. DEFECTS.md back-fill — review any FINDINGS files from the prior work for defects that belong in DEFECTS.md
+
+### What bookends are NOT
+
+- They are not summaries of FINDINGS files. FINDINGS files report what a sub-agent did; bookends report what an archetype IS and DID.
+- They are not pitches or PR. They are honest about deferred items, surprises, violated principles, and untested hypotheses.
+- They are not optional. Native archetypes that ship without bookends are *not following the methodology*; that is a regression to be corrected.
+- They are not static. The right bookend may trigger updates to the left bookend (or to the archetype itself); both are living documents until the archetype is retired.
+
+### Cost of skipping the discipline
+
+If an archetype is built without a left bookend, the right bookend has no anchor for comparison. We saw this with simple-auth: the lift was done without a formal left bookend; the retroactive reconstruction lost the *alternatives considered* (what was almost chosen and why it was rejected) and the *scope-of-deferred* commitments (which deferrals were planned vs. emerged during the work). Future native archetypes pay this cost zero. Skipping the discipline pays the cost forever.
+
+---
+
 ## Reference language
 
 Every archetype in this registry has a **reference-language implementation** —
