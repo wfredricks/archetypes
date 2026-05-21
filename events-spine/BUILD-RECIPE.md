@@ -8,7 +8,9 @@
 
 ## Required reading (in order, before starting)
 
-1. `archetypes/events-spine/LEFT-BOOKEND.md` — the spec. Principles, Constraints, Services, Processes, DataObjects. **Your authoritative source for what to build.**
+0. **Query the SIG first.** Before reading any markdown, run `asi contracts show events-spine` (from a clone of `wfredricks/archetypes-solution-intelligence`) or equivalent Cypher against `bolt://localhost:7689` (auth `neo4j / udt-pass-2026`). The returned contract subgraph is your **authoritative spec.** The markdown files below are the source from which that subgraph was generated; they remain useful as readable references but the SIG is the load-bearing artifact. If the SIG and the markdown disagree, the SIG wins.
+
+1. `archetypes/events-spine/LEFT-BOOKEND.md` — the spec in readable form. Principles, Constraints, Services, Processes, DataObjects. Reference material; the SIG copy (item 0) is the authoritative source.
 2. `archetypes/events-spine/STORY.md` — the narrative. The market-square + newspaper-reporter framing. Use it to sanity-check that your build matches the lived-experience the archetype is meant to produce.
 3. `archetypes/METHODOLOGY.md` — especially §Marking conventions, §Reference language, §Bookends. Your work follows these.
 4. `archetypes/simple-auth/RIGHT-BOOKEND.md` — your role model. The bookend the events-spine right-bookend will compare against after Stage 2d adopts events-spine.
@@ -137,6 +139,57 @@ wfredricks/archetypes/
     ├── ARCHETYPE.yaml                # kind: meta-pattern; no reference-impl
     └── README.md                     # the meta-pattern explained at length
 ```
+
+## SIG read and write protocol
+
+This build is the **first sub-agent run driven by a SIG-realized contract.** The pattern this run establishes propagates to every future native archetype build.
+
+### Reading the contract
+
+Use `@asi/graph-client` (already shipped in `archetypes-solution-intelligence` v0.1.1-pre) or direct `neo4j-driver` Cypher to query:
+
+```cypher
+MATCH (s:Solution {namespace: "asi"})-[:HAS_CONTRACT]->(c:Contract {archetypeName: "events-spine"})
+OPTIONAL MATCH (c)-[:DECLARES_PRINCIPLE]->(p:Principle)
+OPTIONAL MATCH (c)-[:DECLARES_CONSTRAINT]->(co:Constraint)
+OPTIONAL MATCH (c)-[:DECLARES_SERVICE]->(sv:Service)
+OPTIONAL MATCH (c)-[:DECLARES_PROCESS]->(pr:Process)
+OPTIONAL MATCH (c)-[:DECLARES_DATAOBJECT]->(do:DataObject)
+OPTIONAL MATCH (c)-[:DECLARES_HYPOTHESIS]->(h:Hypothesis)
+RETURN c, collect(distinct p) AS principles, collect(distinct co) AS constraints,
+       collect(distinct sv) AS services, collect(distinct pr) AS processes,
+       collect(distinct do) AS dataObjects, collect(distinct h) AS hypotheses
+```
+
+Cache the result. As you implement each phase, cross-reference Principle/Constraint/Service/Process/DataObject keys (P1, C1, S1, etc.) in your code comments and FINDINGS so the trace is explicit.
+
+### Writing back at completion
+
+At the end of Phase L (after all reference-impl code ships and tests pass), update each Hypothesis's status node in the SIG. Use the same graph-client connection:
+
+```cypher
+MATCH (c:Contract {archetypeName: "events-spine"})-[:DECLARES_HYPOTHESIS]->(h:Hypothesis {key: $key})
+SET h.status = $status,
+    h.evidence = $evidence,
+    h.verifiedAt = datetime()
+```
+
+Values for `status`:
+- `held` — the hypothesis was verified; the evidence string cites the test/check that demonstrated it
+- `partial` — partially held; the evidence string names what's verified and what isn't
+- `violated` — the implementation diverged from the hypothesis; the evidence string names why
+- `untested` — the hypothesis is meaningful but no test in this run exercised it (e.g. H6 for events-spine probably stays `untested` since no real adoption has consumed it yet)
+
+The right bookend writes itself as a SIG query after this. Future readers ask the graph, not a markdown file.
+
+### Where the SIG lives
+
+- Host: `bolt://localhost:7689`
+- Auth: `neo4j / udt-pass-2026` (per TOOLS.md and Task 2 FINDINGS)
+- Solution root: `(s:Solution {namespace: "asi", name: "Archetypes"})`
+- Contract you're building against: `(c:Contract {archetypeName: "events-spine", contractId: <see Task 3 FINDINGS for exact id>})`
+
+If PolyGraph is unreachable, attempt `docker start constellation-neo4j` before erroring. If still unreachable, partial FINDINGS + Signal Bill before continuing with markdown-only execution.
 
 ## Phases
 
@@ -473,6 +526,24 @@ N1. `mcp-proxy/README.md`: a substantive document (~2-3 pages) explaining the me
 - When to apply this pattern (anti-triggers: when the backend is genuinely uniform; when the MCP overhead exceeds the swap benefit)
 
 This file is the meta-pattern's home in the registry. mcp-proxy/ARCHETYPE.md is short and points here.
+
+### Phase N½ — SIG status writeback (NEW)
+
+N5.1. **For each Hypothesis H1-H7 in the events-spine Contract**, update the SIG's Hypothesis node with status + evidence:
+
+- **H1** ("The four Principles P1-P5 survived implementation") — set status based on whether each Principle was honored. If any Principle was violated, surface in evidence.
+- **H2** ("The five Constraints C1-C5 were enforced") — set status based on test coverage. Evidence cites the tests that enforce each.
+- **H3** ("The six Services S1-S6 shipped with documented contracts") — set status `held` if all six are exposed with their typed signatures matching the Service nodes.
+- **H4** ("The two Processes Pr1-Pr2 ran with documented cadence") — set status based on whether the Scribe's subscribe-and-record loop (Pr1) and daily-summary cadence (Pr2) work as described. Daily-summary may be `untested` if no full-day integration run happened during the build.
+- **H5** ("The two DataObjects DO1-DO2 round-trip cleanly through the file backend") — status reflects the file-backend round-trip test result.
+- **H6** ("Stage 2d adopted events-spine without per-adopter customization beyond configuration") — stays `untested` (Stage 2d hasn't run yet).
+- **H7** ("Wall-clock for Stage 2d stayed within estimate") — stays `untested` (Stage 2d hasn't run yet).
+
+Use the Cypher update pattern from the SIG protocol section above. Each update is one transaction; failures don't roll back the build (which has already completed), but report any failed updates in FINDINGS.
+
+N5.2. Verify the writeback via `asi contracts show events-spine` (run from a clone of `archetypes-solution-intelligence`). The Hypothesis section should now show `status` and `evidence` for each H1-H7. Include the output in FINDINGS as the right-bookend snapshot.
+
+N5.3. Commit a small artifact `events-spine/RIGHT-BOOKEND-snapshot-2026-05-21.md` to the archetypes repo — a rendered view of the SIG state at completion. Generated by querying the SIG, not hand-written. Format: one table row per Hypothesis with key, text, status, evidence.
 
 ### Phase O — FINDINGS + Signal
 
