@@ -13,5 +13,12 @@ composes:
   - simple-subscriber
   - scribe
   - mcp-proxy
-adopters: []  # populated when SI/I Stage 2d ships
+adopters:
+  - name: solution-intelligence-identity
+    repo: https://github.com/wfredricks/solution-intelligence-identity
+    version: v0.2.2-pre
+    stage: Stage 2d
+    adopted: 2026-05-21
+    scope: publisher-only
+    pinned_commit: 1b334abbb354fa89dd758225e960ce5f58dcf365  # events-spine-v0.1.0-pre
 defects_known: []  # populated by first adoption findings
