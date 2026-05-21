@@ -227,6 +227,120 @@ Archetypes only work if their owners maintain them.
 Skipping maintenance is the failure mode that turns a clean archetype into dead
 code. The methodology is non-negotiable on this point.
 
+## Reference language
+
+Every archetype in this registry has a **reference-language implementation** —
+the canonical form against which all other-language translations are verified.
+
+**The reference language is TypeScript.**
+
+### Why TypeScript
+
+The reference language must accommodate idioms from any major target language so
+translations can map cleanly in either direction. TypeScript covers all three
+paradigms a real registry will need to translate to:
+
+- **Functional** (idiomatic in Haskell, OCaml, F#, modern JS, parts of Rust)
+- **Object-oriented** (Java, C#, Python, Ruby, parts of Swift)
+- **Procedural** (Go, C, older Fortran/Pascal lineages, parts of Rust)
+
+TypeScript can express each of these patterns natively. Picking Python would have
+biased the registry toward dynamic-OOP; picking Go would have biased toward
+procedural-with-light-OOP; picking Haskell would have biased toward pure-functional.
+TypeScript is multi-paradigm by design, and *the reference language's paradigm
+biases bleed into every translation*.
+
+The choice is reversible at significant cost. If a future archetype proves
+TypeScript can't express its pattern cleanly, that archetype's reference can
+be an exception; we don't re-base the whole registry.
+
+### What "reference-language implementation" means
+
+For each archetype:
+
+1. The reference-impl in TypeScript IS the canonical specification.
+2. Tests for the archetype run against the TypeScript reference and must pass.
+3. Translations into other languages (Go, Python, Rust, Java, etc.) are
+   *transpositions* of the reference, verified against translated test suites.
+4. The archetype's `ARCHETYPE.yaml` may eventually declare
+   `reference_language: typescript` and list `available_translations`.
+
+### How the orchestrator uses this
+
+The DSD orchestrator (when built) operates as a **graph compiler** in three passes:
+
+1. **SIG-to-composition pass** (deterministic graph traversal): identify
+   archetypes via SIG trace edges (see next section), compute the composition
+   graph from `composes:` declarations.
+2. **Composition-to-reference-language pass** (LLM + sub-agents): derive each
+   archetype's TypeScript reference-impl into the target project; generate
+   integration glue between archetypes; verify against contract test suites.
+3. **Reference-language-to-target-language pass** (LLM, optional): transpose
+   from TypeScript to Go, Python, Rust, etc.; verify against translated tests.
+
+Each pass has a clear contract and is independently verifiable. The reference
+language is the trusted intermediate; the target language is a transposition.
+
+---
+
+## SIG ↔ archetype tracing
+
+DSD does not stand alone (see DSD-PRFAQ.md §Terminology). It pairs with **SIG**
+(Solution Intelligence Graph) and **SDD** (SIG-Driven Development) in a closed
+loop. This section defines the graph schema that bridges them.
+
+When a SIG describes a solution and the orchestrator needs to compose its
+substrate from this registry, the orchestrator traverses **trace edges** from
+SIG nodes to Archetype nodes. The edges declare *which archetype realizes which
+part of the SIG.*
+
+### Trace-edge ontology
+
+Four edge types from SIG nodes to Archetype nodes:
+
+| Edge type | SIG node label | Semantics |
+|---|---|---|
+| `REALIZED_BY` | `Capability` | The capability's runtime behavior is provided by this archetype. |
+| `SATISFIED_BY` | `Requirement` | The requirement is met by adopting this archetype. |
+| `EXPOSED_BY` | `Interface` | The interface to external systems is exposed by this archetype. |
+| `INFORMED_BY` | `Theme` | The theme's design constraints shape the choice of this archetype. |
+
+Plus the existing intra-registry edge type:
+
+| Edge type | Source | Target | Semantics |
+|---|---|---|---|
+| `COMPOSES` | `Archetype` | `Archetype` | The source composite archetype is built from the target primitive(s). See `COMPOSITION.md`. |
+| `ADOPTED_IN` | `Archetype` | `Project` | An adoption record. Equivalent to `ADOPTIONS.md` entries in graph form. |
+
+### Why this is in METHODOLOGY.md and not in the SIG paper
+
+The trace edges are a contract between two methodologies. The SIG paper defines
+SIG's internal ontology (Capability, Requirement, Evidence, etc.); this registry
+defines what an Archetype node is. The *bridge* between them — the trace edges —
+deserves to live in the registry because the registry is what gets traversed when
+the orchestrator does the SIG-to-composition pass.
+
+The SIG paper will reference back to this section when it discusses the closed
+loop.
+
+### What this enables
+
+Once SIG nodes have trace edges to Archetype nodes, the orchestrator's first pass
+is a deterministic graph query:
+
+1. Walk the SIG, collect all archetypes referenced by trace edges.
+2. For each composite archetype, expand its `composes:` declaration into the full
+   primitive set.
+3. Emit the composition graph.
+
+No LLM judgment is required in this pass. The LLM's contribution begins in pass 2
+(generating integration glue between archetype boundaries) and pass 3 (target-
+language transposition, if requested).
+
+This is what makes the orchestrator a *graph compiler* rather than an oracle.
+
+---
+
 ## Why archetype at all
 
 The AI-assisted-coding era flipped the convenience-vs-control tradeoff. Pre-AI,
