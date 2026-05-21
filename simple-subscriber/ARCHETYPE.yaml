@@ -1,0 +1,14 @@
+name: simple-subscriber
+kind: primitive
+description: >
+  Typed subscriber primitive. Registers a handler against a subject filter on
+  the bus, parses incoming messages into canonical events, and hands them to
+  the handler. Catches handler exceptions so a misbehaving handler does not
+  crash the subscriber. Canonical bus: NATS. The receive-side counterpart to
+  simple-pubsub.
+composes: []
+reference_impl:
+  in_tree: true
+  pointer: ../events-spine/reference-impl/src/subscriber/
+adopters: []
+defects_known: []

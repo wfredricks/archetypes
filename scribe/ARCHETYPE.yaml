@@ -1,0 +1,15 @@
+name: scribe
+kind: primitive
+description: >
+  The canonical subscriber. Subscribes to the bus (default ">" — everything),
+  writes each event to a pluggable backend, exposes an MCP server with three
+  tools (scribe.query, scribe.tail, scribe.summary), and produces a daily
+  narrative summary via an LLM. The newspaper-reporter of the substrate:
+  records what it hears, files at end of day, swaps backends without changing
+  its interface to the rest of the town.
+composes: []
+reference_impl:
+  in_tree: true
+  pointer: ../events-spine/reference-impl/src/scribe/
+adopters: []
+defects_known: []

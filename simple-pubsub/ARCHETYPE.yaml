@@ -1,0 +1,15 @@
+name: simple-pubsub
+kind: primitive
+description: >
+  Typed publisher primitive. Wraps a message-bus client (canonical: NATS) with
+  a typed event shape, subject-naming conventions, and a fire-and-forget
+  publish API. The pattern is the publisher half of pub/sub; it owns the
+  envelope (id, publisherId, publishedAt, correlationId) and emits the event
+  on the configured subject. Stand-alone primitive; composes into composite
+  archetypes like events-spine that need a substrate-grade publisher.
+composes: []
+reference_impl:
+  in_tree: true
+  pointer: ../events-spine/reference-impl/src/publisher/
+adopters: []
+defects_known: []
