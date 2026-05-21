@@ -1,6 +1,8 @@
-# Declarative Software Development — PR/FAQ
+# Declarative Software Development (SDD) — PR/FAQ
 
 *Working scoping document. Amazon-style PR/FAQ. NOT a paper yet. Written 2026-05-21 by Bhai with Bill in the loop. Status: WIP. Owner: Bill.*
+
+> **Terminology:** "SDD" in this document stands for **Software Development**. "Declarative SDD" is the practice of composing software from a registry of proven, openly-documented patterns ("archetypes") rather than re-implementing those patterns from scratch each time. Not to be confused with Software Design Document or System Design Document, which use the same acronym in adjacent industries.
 
 ---
 
@@ -25,7 +27,7 @@ The PR is written *as if shipping today*. It isn't. Two-thirds of what the PR cl
 
 **Lancaster, PA — \[Future date\]** — Software development today is mostly the re-implementation of patterns that have already been solved many times. Auth. Audit logs. Event buses. Graph rendering. Natural-language interfaces. Every project that needs these things builds them again, slightly differently, often slightly worse. Skilled engineers spend most of their day re-paving roads that other engineers paved last year.
 
-**Declarative Software Development** changes the unit of work. Instead of writing code, engineers and AI agents compose proven patterns — **archetypes** — from an open registry. Each archetype is a hardened design with a reference implementation, an adoption recipe, a known-defects list, and a list of projects that have already adopted it. Adopting an archetype means deriving from the reference, marking provenance, fixing known defects on the way in, and contributing back any new defects discovered.
+**Declarative Software Development (SDD)** changes the unit of work. Instead of writing code, engineers and AI agents compose proven patterns — **archetypes** — from an open registry. Each archetype is a hardened design with a reference implementation, an adoption recipe, a known-defects list, and a list of projects that have already adopted it. Adopting an archetype means deriving from the reference, marking provenance, fixing known defects on the way in, and contributing back any new defects discovered.
 
 This is not low-code. Low-code hides the implementation behind a vendor's widgets; declarative SDD exposes the implementation, marks every line with its origin, and gives the adopter complete ownership of their derivation. Low-code traps you in a tool; archetypes give you a starting point you can fully read, modify, and own.
 
