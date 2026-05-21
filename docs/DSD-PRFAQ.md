@@ -1,8 +1,8 @@
-# Declarative Software Development (SDD) — PR/FAQ
+# Declarative Software Development (DSD) — PR/FAQ
 
 *Working scoping document. Amazon-style PR/FAQ. NOT a paper yet. Written 2026-05-21 by Bhai with Bill in the loop. Status: WIP. Owner: Bill.*
 
-> **Terminology:** "SDD" in this document stands for **Software Development**. "Declarative SDD" is the practice of composing software from a registry of proven, openly-documented patterns ("archetypes") rather than re-implementing those patterns from scratch each time. Not to be confused with Software Design Document or System Design Document, which use the same acronym in adjacent industries.
+> **Terminology:** **DSD** = **Declarative Software Development**. The practice of composing software from a registry of proven, openly-documented patterns ("archetypes") rather than re-implementing those patterns from scratch each time. The DSD acronym is chosen to avoid collision with SDD (Software Design Document, System Design Document) which are already widely used.
 
 ---
 
@@ -27,9 +27,9 @@ The PR is written *as if shipping today*. It isn't. Two-thirds of what the PR cl
 
 **Lancaster, PA — \[Future date\]** — Software development today is mostly the re-implementation of patterns that have already been solved many times. Auth. Audit logs. Event buses. Graph rendering. Natural-language interfaces. Every project that needs these things builds them again, slightly differently, often slightly worse. Skilled engineers spend most of their day re-paving roads that other engineers paved last year.
 
-**Declarative Software Development (SDD)** changes the unit of work. Instead of writing code, engineers and AI agents compose proven patterns — **archetypes** — from an open registry. Each archetype is a hardened design with a reference implementation, an adoption recipe, a known-defects list, and a list of projects that have already adopted it. Adopting an archetype means deriving from the reference, marking provenance, fixing known defects on the way in, and contributing back any new defects discovered.
+**Declarative Software Development (DSD)** changes the unit of work. Instead of writing code, engineers and AI agents compose proven patterns — **archetypes** — from an open registry. Each archetype is a hardened design with a reference implementation, an adoption recipe, a known-defects list, and a list of projects that have already adopted it. Adopting an archetype means deriving from the reference, marking provenance, fixing known defects on the way in, and contributing back any new defects discovered.
 
-This is not low-code. Low-code hides the implementation behind a vendor's widgets; declarative SDD exposes the implementation, marks every line with its origin, and gives the adopter complete ownership of their derivation. Low-code traps you in a tool; archetypes give you a starting point you can fully read, modify, and own.
+This is not low-code. Low-code hides the implementation behind a vendor's widgets; DSD exposes the implementation, marks every line with its origin, and gives the adopter complete ownership of their derivation. Low-code traps you in a tool; archetypes give you a starting point you can fully read, modify, and own.
 
 **What ships today** *(written in the future tense, pre-orchestrator)*:
 
@@ -37,13 +37,13 @@ This is not low-code. Low-code hides the implementation behind a vendor's widget
 
 - **An orchestrator** that translates declarative intent ("build me a secure web app fronting a SIG blackboard") into a composition of archetypes plus the adapters between them. The orchestrator runs as an AI agent with access to the registry; it generates the project skeleton, supervises the per-archetype adoption sub-agents, and hands the composed result back to the human.
 
-- **A methodology** — codified at `github.com/wfredricks/archetypes/METHODOLOGY.md` — that governs how archetypes get adopted, marked, defected, and refined. The methodology is the discipline that prevents declarative SDD from collapsing into the failures of low-code: every adoption is fully owned, fully marked, and fully readable by the adopter.
+- **A methodology** — codified at `github.com/wfredricks/archetypes/METHODOLOGY.md` — that governs how archetypes get adopted, marked, defected, and refined. The methodology is the discipline that prevents DSD from collapsing into the failures of low-code: every adoption is fully owned, fully marked, and fully readable by the adopter.
 
 - **Working examples**: the Solution Intelligence runtime (`solution-intelligence-identity`, `solution-intelligence-cli`, `solution-intelligence-graph-client`, `solution-intelligence-graph`) is built entirely by composing archetypes. \[Specific metrics from the build.\] What would have been a quarter of careful engineering work was delivered in \[N\] days, with every component carrying provenance markings that let any reader trace back to the canonical archetype.
 
 **"The shift is not from manual to automated,"** said Bill Fredricks, originator of the approach. **"It's from re-implementing patterns to composing them. AI agents do the mechanical work; humans do the parts that need judgment. The unit of work changes, and that changes who can do the work and how fast it gets done."**
 
-The Declarative SDD model is open. The archetypes are open. The methodology is published. The orchestrator is a reference implementation. Anyone can add archetypes, propose compositions, or build their own orchestrator that speaks the same vocabulary.
+The DSD model is open. The archetypes are open. The methodology is published. The orchestrator is a reference implementation. Anyone can add archetypes, propose compositions, or build their own orchestrator that speaks the same vocabulary.
 
 ---
 
@@ -57,9 +57,9 @@ The Declarative SDD model is open. The archetypes are open. The methodology is p
 
 **Long answer:** Low-code hides the implementation. You drag a widget; the vendor's code generates underneath; you can't read it or modify it safely without breaking the contract with the vendor. When the platform's abstractions don't fit your case, you're stuck.
 
-Declarative SDD does the opposite. Adoption *means* deriving the actual code from a reference implementation, marking every file with its provenance, and owning the result completely. You can read every line. You can modify any of it. The marking conventions tell future readers where the lines came from, which means modifications get audited cleanly. **There's no vendor in the loop.** The archetypes registry is open; the methodology is published; the orchestrator is a reference, not a SaaS.
+DSD does the opposite. Adoption *means* deriving the actual code from a reference implementation, marking every file with its provenance, and owning the result completely. You can read every line. You can modify any of it. The marking conventions tell future readers where the lines came from, which means modifications get audited cleanly. **There's no vendor in the loop.** The archetypes registry is open; the methodology is published; the orchestrator is a reference, not a SaaS.
 
-The one-line differentiation: **low-code hides; declarative SDD marks.**
+The one-line differentiation: **low-code hides; DSD marks.**
 
 ### 2. Aren't you just describing scaffolding tools, code generators, or framework templates?
 
@@ -93,7 +93,7 @@ Archetypes distribute patterns you derive into your project. You don't depend on
 
 This matters for federal deployments, supply-chain security, long-term maintenance, and cases where vendoring is required. It also matters because *derivable* code is the only kind an AI orchestrator can reliably compose into a coherent project. You can't ask an LLM to "compose `express` with `passport`"; the seams between them are runtime-coupling. You CAN ask it to "compose `simple-auth` with `audit-log` into a new project," because both come with adoption recipes and known integration points.
 
-### 5. What's the role of AI in this? Could you do declarative SDD without LLMs?
+### 5. What's the role of AI in this? Could you do DSD without LLMs?
 
 **Short answer:** You could do the registry without LLMs. You can't do the orchestrator without them, and the orchestrator is what makes the whole thing scale.
 
@@ -109,9 +109,9 @@ So: the registry without LLMs is a nice-to-have. The registry with LLMs becomes 
 
 **Long answer:** In every project, some fraction is novel — the actual problem this project exists to solve. That fraction is small (typically 10-20%) compared to the mechanical work (auth, logs, UI scaffold, integration, deployment, observability). Today most senior-engineer time gets eaten by the mechanical 60-80%. The novel part gets shortchanged.
 
-Declarative SDD does not try to archetype the novel part. It composes the mechanical part, leaving the novel part to humans + AI working at their full capacity. The shift is in *what humans spend their day on*, not in *automating away human judgment*.
+DSD does not try to archetype the novel part. It composes the mechanical part, leaving the novel part to humans + AI working at their full capacity. The shift is in *what humans spend their day on*, not in *automating away human judgment*.
 
-If you don't have novel work — if your project is literally "another CRUD app" — declarative SDD will compose 90%+ of it. That's not a bug; that's the appropriate outcome for that kind of project.
+If you don't have novel work — if your project is literally "another CRUD app" — DSD will compose 90%+ of it. That's not a bug; that's the appropriate outcome for that kind of project.
 
 ### 7. Doesn't this require a huge upfront investment to build the registry?
 
@@ -139,7 +139,7 @@ Compare with npm packages, where you depend on the published version: if the pac
 
 **Short answer:** It's been proven at the small scale (single project) on 2026-05-20/21. Scale-proof is the next 6-12 months of work.
 
-**Long answer:** Honest answer. As of 2026-05-21, declarative SDD has been proven for one archetype (`simple-auth` adopted into `solution-intelligence-identity` via three stages: 2a/2b/2c). One archetype, one adoption, three sub-stages. The methodology held. The marking conventions held. The defects-fix discipline held. The wall-clock estimates were beaten 2-3× by sub-agent execution against recipe files.
+**Long answer:** Honest answer. As of 2026-05-21, DSD has been proven for one archetype (`simple-auth` adopted into `solution-intelligence-identity` via three stages: 2a/2b/2c). One archetype, one adoption, three sub-stages. The methodology held. The marking conventions held. The defects-fix discipline held. The wall-clock estimates were beaten 2-3× by sub-agent execution against recipe files.
 
 What we don't have yet:
 - Multi-archetype composition in a single adoption
@@ -153,15 +153,15 @@ The work plan for 2026-Q2 and Q3 is exactly to build these. The PR/FAQ exists in
 
 **Short answer:** Provenance markings + open methodology + auditable derivations are exactly what federal acquisition prefers.
 
-**Long answer:** Federal software acquisition values: provenance (where did this code come from?), auditability (can a third party verify it?), supply-chain security (no surprise dependencies), and the ability to own and maintain the code without vendor lock-in. Every one of these is a strength of declarative SDD and a weakness of:
+**Long answer:** Federal software acquisition values: provenance (where did this code come from?), auditability (can a third party verify it?), supply-chain security (no surprise dependencies), and the ability to own and maintain the code without vendor lock-in. Every one of these is a strength of DSD and a weakness of:
 - Pure SaaS / vendor solutions (lock-in, opaque)
 - Low-code platforms (proprietary, locked formats)
 - Custom from-scratch development (slow, expensive, every project rebuilds the same patterns)
 - Package-manager-heavy development (supply-chain risk, no first-class provenance)
 
-Declarative SDD is the model that aligns with how federal acquisition wants software to be built but rarely gets. The marking conventions ARE provenance. The adopters list IS supply-chain transparency. The defects-known list IS auditable disclosure.
+DSD is the model that aligns with how federal acquisition wants software to be built but rarely gets. The marking conventions ARE provenance. The adopters list IS supply-chain transparency. The defects-known list IS auditable disclosure.
 
-Credence's existing AISWF play (AI-augmented SDLC) and declarative SDD are not in conflict. AISWF makes the existing pipeline faster; declarative SDD changes what the pipeline produces. They could merge: AISWF orchestrators picking archetypes from a Credence-hosted registry, with derivations marked for cATO purposes.
+Credence's existing AISWF play (AI-augmented SDLC) and DSD are not in conflict. AISWF makes the existing pipeline faster; DSD changes what the pipeline produces. They could merge: AISWF orchestrators picking archetypes from a Credence-hosted registry, with derivations marked for cATO purposes.
 
 ### 11. What's the worst-case failure mode of this idea?
 
