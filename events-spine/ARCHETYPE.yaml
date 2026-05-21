@@ -1,0 +1,17 @@
+name: events-spine
+kind: composite
+description: >
+  Event-driven communication substrate. Publishers emit typed events;
+  subscribers act on them; a canonical Scribe subscriber logs to a
+  pluggable backend exposed via MCP. Composes simple-pubsub +
+  simple-subscriber + scribe + mcp-proxy. NATS as the canonical bus.
+reference_languages:
+  primary: typescript
+  available_translations: []
+composes:
+  - simple-pubsub
+  - simple-subscriber
+  - scribe
+  - mcp-proxy
+adopters: []  # populated when SI/I Stage 2d ships
+defects_known: []  # populated by first adoption findings

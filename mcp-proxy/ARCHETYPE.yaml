@@ -1,0 +1,15 @@
+name: mcp-proxy
+kind: meta-pattern
+description: >
+  A meta-pattern: expose a stable MCP surface in front of a swappable backend
+  so that backend choice is a configuration concern, not a code concern, for
+  anyone who talks to the MCP surface. Documentation-only; no reference
+  implementation. The Scribe (in events-spine) is the first worked example;
+  future archetypes (graph backends, identity backends, blackboard backends)
+  will cite this pattern by name.
+composes: []
+reference_impl:
+  in_tree: false
+  pointer: ./README.md
+adopters: []
+defects_known: []
