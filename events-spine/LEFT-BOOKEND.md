@@ -1,3 +1,9 @@
+---
+archetypeName: events-spine
+archetypeKind: composite
+archetypeVersion: v0.1.0-pre
+---
+
 # events-spine — Left Bookend (Spec)
 
 *The spec half of the events-spine left-bookend pair. The story half is `STORY.md`; this is the structured commitment of what gets built and what postures it takes.*
