@@ -1,0 +1,21 @@
+name: simple-auth
+kind: primitive
+description: >
+  Email-code authentication: user enters email, receives short-lived code, posts
+  code back, gets session token. Token verification via shared HMAC key store
+  with monthly key rotation and a 3-day cross-month grace period. State changes
+  emitted as append-only audit entries. Compose-ready primitive for any
+  application needing passwordless email-based auth.
+composes: []
+reference_impl:
+  in_tree: false
+  pointer: https://github.com/wfredricks/bangauth
+adopters:
+  - solution-intelligence-identity (Stage 2a, v0.2.0-pre)
+  - solution-intelligence-identity (Stage 2b, v0.2.0-pre — X-SI-Actor header retired)
+defects_known:
+  - X-SI-Actor header shortcut bypasses token verification (fixed in SI/I Stage 2b)
+  - Unused createHmac import in adapters/memory-key-store.ts (caught by noUnusedLocals)
+  - email.test.ts does not import email.ts — exercises template concepts via inline strings (coverage gap)
+  - Naming collision keys-memory.ts (production) and memory-key-store.ts (test fixture) both export class MemoryKeyStore
+  - Module-scope singleton capture in auth/server.ts — convert to lazy accessors with a test-reset helper

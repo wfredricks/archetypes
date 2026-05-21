@@ -1,0 +1,26 @@
+# Node (precautionary; this is a docs-first repo but reference-impls may land later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Misc
+*.log
+tmp/

@@ -1,0 +1,8 @@
+# Placeholder so reference-impl/ exists in the template.
+#
+# TODO: when this archetype is filled in:
+#   - If the reference implementation lives in-tree, replace this file with the
+#     actual code (src/, tests/, package.json, README.md, etc.).
+#   - If the reference implementation lives in an external repo, replace this
+#     file with a POINTER.md citing the external repo and explaining why the
+#     code isn't in-tree.

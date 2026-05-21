@@ -1,0 +1,15 @@
+# Machine-readable manifest for this archetype.
+# See ../COMPOSITION.md for the format spec.
+#
+# TODO: replace every <placeholder> below, then delete this comment.
+
+name: <pattern-name>              # lower-kebab-case; must match the directory name
+kind: primitive                   # primitive | composite
+description: >
+  <one-paragraph description of the pattern. Plain English. No marketing.>
+composes: []                      # required for kind: composite; [] for primitive
+reference_impl:
+  in_tree: false                  # true if reference implementation lives under ./reference-impl/
+  pointer: <repo url or path>     # required when in_tree: false
+adopters: []                      # list real adoptions: "- <project-name> (<stage-or-tag>)"
+defects_known: []                 # mirror short summaries from DEFECTS.md

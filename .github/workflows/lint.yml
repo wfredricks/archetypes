@@ -1,0 +1,33 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      # Lightweight Markdown lint. Docs-first repo — no tests, no coverage gates.
+      # markdownlint-cli2 has sensible defaults; we run it without a config to keep
+      # noise low while the registry is being seeded. Tighten as content stabilizes.
+      - name: markdownlint
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules" || true
+
+      - name: YAML syntax check (ARCHETYPE.yaml)
+        run: |
+          set -e
+          for f in $(find . -name 'ARCHETYPE.yaml' -not -path './node_modules/*'); do
+            echo "Checking $f"
+            python3 -c "import yaml, sys; yaml.safe_load(open('$f')); print('  ok')"
+          done
