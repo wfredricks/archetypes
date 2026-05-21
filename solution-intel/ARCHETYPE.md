@@ -62,14 +62,22 @@ The composition is non-trivial. `solution-intel` is the largest composite archet
 
 ## Reference implementation
 
-The canonical reference is the `wfredricks/solution-intelligence-*` repo family:
+The canonical reference lives **in-tree** as of 2026-05-21 under `./reference-impl/`. Three of the four substrate pieces are present; the fourth (the graph server) lands at Stage 3.
 
-- `wfredricks/solution-intelligence-identity` (canonical identity service)
-- `wfredricks/solution-intelligence-cli` (canonical operator CLI)
-- `wfredricks/solution-intelligence-graph-client` (canonical graph-access library)
-- `wfredricks/solution-intelligence-graph` (canonical graph server — Stage 3)
+### Reference-implementation status
 
-At full lift, an `ADOPTION-RECIPE.md` will describe how to derive these into a new project. The recipe will be substantially more involved than the simple-auth or events-spine recipes because `solution-intel` is the substrate adoption, not a single-purpose pattern.
+| Piece | Status | Path |
+|---|---|---|
+| `identity` (SI/I) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-identity` @ 0.2.0-pre) | `./reference-impl/identity/` |
+| `cli` (SI CLI) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-cli` @ 0.2.1-pre) | `./reference-impl/cli/` |
+| `graph-client` (SI/G-client) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-graph-client` @ 0.1.0-pre; scaffold-only) | `./reference-impl/graph-client/` |
+| `graph` (SI/G server) | ⏳ pending Stage 3 (chainblocks → simple-ledger → SI/G) | not yet present |
+
+The original `wfredricks/solution-intelligence-*` repos remain as historical artifacts; the in-tree copy is the canonical reference going forward. See `./reference-impl/POINTER.md` for the one-line note.
+
+Each copied subdirectory carries `// @adopt:` markers at every identity-and-deployment value (namespace, project id, default port, service name, audit-log path, CLI binary name, credentials directory, project config path, default endpoint env var, etc.) and at every composition site (identity, audit-ledger, eventing, graph). Adopters work the marker list before declaring the adoption done; the marker comments stay as historical documentation of each choice.
+
+At full lift, a complete `ADOPTION-RECIPE.md` will describe how to derive `./reference-impl/` into a new project. The recipe will be substantially more involved than the simple-auth or events-spine recipes because `solution-intel` is the substrate adoption, not a single-purpose pattern. A sketch is in `./ADOPTION-RECIPE.md` (Task 1 of the SIG-first pivot).
 
 ## The recursive moment
 
