@@ -27,6 +27,13 @@ import type { Role, RoleGrant } from './types.js';
 export function grantsLedgerPath(): string {
   return (
     process.env.SI_GRANTS_PATH ??
+    // @adopt:grants-ledger-path
+    // Q: Where does the role-grant ledger live on disk?
+    //    Dev defaults to <cwd>/data/identity/ so local runs are
+    //    self-contained; production should set SI_GRANTS_PATH to a
+    //    persistent, owner-only directory backed by durable storage.
+    // Default: <cwd>/data/identity/grants.jsonl
+    // Format: absolute filesystem path
     path.join(process.cwd(), 'data', 'identity', 'grants.jsonl')
   );
 }

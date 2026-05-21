@@ -119,6 +119,13 @@ async function readProjectConfig(
   // Loop until the parent equals the current path (i.e. we hit "/").
   // Bounded to ~50 hops as a paranoia guard against symlink loops.
   for (let i = 0; i < 50; i++) {
+    // @adopt:project-config-path
+    // Q: What is the per-project config file the CLI walks up to find?
+    //    Mirrors git's ".find the project root" behavior. The CLI walks
+    //    from cwd toward / looking for this file; the first one wins.
+    //    Keep aligned with @adopt:namespace.
+    // Default: .si/config.yaml
+    // Format: relative path under each candidate directory
     const candidate = path.join(cur, '.si', 'config.yaml');
     let raw: string | null = null;
     try {
@@ -240,6 +247,12 @@ export async function resolveProjectConfig(
     config.si.url = trimmedFlag;
     return { config, urlSource: 'flag' };
   }
+  // @adopt:default-endpoint-env-var
+  // Q: Which environment variable carries the default endpoint URL?
+  //    Precedence is --url flag > this env var > project config. Keep
+  //    aligned with @adopt:namespace (the SI_ prefix is the namespace).
+  // Default: SI_URL
+  // Format: SCREAMING_SNAKE_CASE matching ^[A-Z][A-Z0-9_]{2,31}$
   const envUrl = process.env.SI_URL?.trim();
   if (envUrl && envUrl.length > 0) {
     config.si.url = envUrl;

@@ -75,6 +75,13 @@ export interface Credentials {
  * // per call so this is correct.
  */
 export function credentialsDir(): string {
+  // @adopt:credentials-dir
+  // Q: Where on the user's home does the CLI cache its credentials?
+  //    The directory is created with mode 0700 and the credentials file
+  //    inside it with mode 0600 so only the owning user can read tokens.
+  //    Keep aligned with @adopt:namespace and @adopt:cli-binary-name.
+  // Default: ~/.si
+  // Format: dotfile directory name, relative to $HOME
   return path.join(os.homedir(), '.si');
 }
 

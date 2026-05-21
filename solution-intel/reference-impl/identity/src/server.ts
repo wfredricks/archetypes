@@ -28,6 +28,12 @@ export function buildApp(): Hono {
 
   app.use('*', cors());
 
+  // @adopt:auth-mount-path
+  // Q: Under which path does the identity router mount?
+  //    Clients (CLI, browsers, other services) hit `<mount>/request-code`,
+  //    `<mount>/verify-code`, `<mount>/.well-known/jwks.json`.
+  // Default: /auth
+  // Format: absolute path beginning with /
   // Mount the bangauth archetype under /auth
   app.route('/auth', authRouter);
 
@@ -38,8 +44,28 @@ export function buildApp(): Hono {
   app.get('/grants', listGrantsHandler);
 
   app.get('/health', (c) =>
+    // @adopt:service-name
+    // Q: Same service name as the boot banner; appears in /health.
+    // Default: si-identity
     c.json({ ok: true, service: 'si-identity', version: VERSION }),
   );
+
+  // @adopt:composes:eventing
+  // Q: Which eventing archetype does this project compose?
+  // Default: NONE in v0.1 — SI emits audit only, via the audit-ledger
+  //          archetype (see src/audit.ts). Stage 2d adopts events-spine
+  //          here: a NATS publisher (or equivalent) is constructed once
+  //          at boot, wired into the audit emitter (so every audit event
+  //          also fans out as a NATS message), and closed on shutdown.
+  // Reference: archetypes/events-spine/ARCHETYPE.md
+  // Notes: This is a deliberate placeholder. The eventing adoption belongs
+  //        here (not inside individual handlers) because it's a single
+  //        substrate-scope resource: one publisher per process, mounted at
+  //        boot, shared across handlers. The audit emitter (src/audit.ts)
+  //        is the natural sink to fan out to events-spine once wired.
+  // Alternatives: any archetype whose contract satisfies the eventing role.
+  //               Currently registered: events-spine (pending Stage 2d).
+
 
   app.notFound((c) => c.json({ error: 'Not found' }, 404));
 
@@ -64,6 +90,13 @@ export interface ServerHandle {
  * // module from tests does NOT bind a socket. Tests call startServer(0) and
  * // get a real bound port back.
  */
+// @adopt:default-port
+// Q: What TCP port does the identity service listen on by default?
+//    Override at boot via the `SI_PORT` env var or by passing `port` to
+//    startServer(). The CLI's default URL (cli/src/url.ts) assumes the
+//    matching value; keep them in sync.
+// Default: 3001
+// Format: 1–65535
 export async function startServer(port = 3001): Promise<ServerHandle> {
   const app = buildApp();
   const server = serve({ fetch: app.fetch, port });
@@ -115,6 +148,11 @@ if (isCliEntry()) {
   const port = Number(process.env.SI_PORT ?? 3001);
   startServer(port)
     .then((handle) => {
+      // @adopt:service-name
+      // Q: What service name appears in the boot banner and /health response?
+      //    Used for log-line provenance and operator-facing diagnostics.
+      // Default: si-identity
+      // Format: kebab-case, [a-z][a-z0-9-]{2,31}
       console.log(`🚀 si-identity v${VERSION} listening on :${handle.port}`);
       const shutdown = async () => {
         await handle.close();

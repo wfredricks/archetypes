@@ -17,4 +17,27 @@
  * @module index
  */
 
+// @adopt:composes:graph
+// Q: Which graph-substrate archetype does this project compose?
+// Default: graph-db via PolyGraph (the SI/G server hosts the project's
+//          Solution Intelligence Graph; the graph-client package is the
+//          typed HTTP client that talks to it). Stage 3 lands the
+//          implementation.
+// Reference: archetypes/graph-db/ARCHETYPE.md (pending)
+// Notes: This package IS the graph composition site for the SI substrate.
+//        Replacing the graph archetype (Neo4j-via-Bolt, Neptune, in-memory
+//        for tests) means replacing this client's wire format and
+//        endpoint surface. The Stage-3 implementation will pick that
+//        wire format; until then this is a placeholder.
+// Alternatives: any archetype whose contract satisfies the graph role.
+//               Currently registered: graph-db (pending Stage 3 lift).
+
+// @adopt:graph-endpoint
+// Q: What URL does the graph client target by default?
+//    Stage 3 will read this from .si/config.yaml's `si.graphUrl` (see
+//    cli/src/url.ts's resolveProjectConfig). Until then, no default
+//    endpoint is hard-coded — the scaffold is intentionally empty.
+// Default: (none; supplied at construction time by the consuming process)
+// Format: absolute URL
+
 export {};

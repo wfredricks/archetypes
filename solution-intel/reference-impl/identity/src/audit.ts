@@ -42,6 +42,22 @@ export function _resetSeqForTests(): void {
 
 // ─── Path resolution ─────────────────────────────────────────────────────────
 
+// @adopt:composes:audit-ledger
+// Q: Which audit-ledger archetype does this project compose?
+// Default: simple-ledger via chainblocks (JSONL fallback in v0.1; real
+//          chainblocks integration arrives at Stage 3). The canonical sink
+//          is an append-only block-chained ledger; the local fallback below
+//          (one JSON line per event) is byte-compatible enough for replay.
+// Reference: archetypes/simple-ledger/ARCHETYPE.md (pending)
+// Notes: The functions `emitGrantEvent` / `emitRevokeEvent` are the seam.
+//        Replacing them with another audit archetype (CloudWatch, OpenSearch,
+//        a real chainblocks client, an OTEL pipeline) preserves the contract
+//        as long as both still return a monotonic block sequence number
+//        suitable for embedding as `auditBlock` on the corresponding ledger
+//        row in `src/grants.ts`.
+// Alternatives: any archetype whose contract satisfies the audit-ledger role.
+//               Currently registered: simple-ledger (this, via chainblocks).
+
 /**
  * Resolve the audit-log JSONL path.
  *
@@ -51,6 +67,13 @@ export function _resetSeqForTests(): void {
 export function auditLogPath(): string {
   return (
     process.env.SI_AUDIT_PATH ??
+    // @adopt:audit-log-path
+    // Q: Where does the audit ledger write its JSONL stream?
+    //    Defaults relative to cwd so dev runs leave a local data/ tree;
+    //    production deployments should override SI_AUDIT_PATH to a
+    //    persistent, owner-only directory (e.g. /var/lib/si/chainblocks/).
+    // Default: <cwd>/data/chainblocks/si.audit.jsonl
+    // Format: absolute filesystem path
     path.join(process.cwd(), 'data', 'chainblocks', 'si.audit.jsonl')
   );
 }
@@ -80,6 +103,13 @@ async function nextSeq(): Promise<number> {
 
 // ─── Canonical payload shape ─────────────────────────────────────────────────
 
+// @adopt:event-subject-prefix
+// Q: What prefix do this project's audit-event types use?
+//    Embedded in the `type` field of every emitted audit event; used by
+//    downstream consumers (Scribe, NATS subscribers, OTEL pipelines) to
+//    filter on subject patterns. Keep aligned with @adopt:project-id.
+// Default: si  (events: "si.role.granted", "si.role.revoked")
+// Format: [a-z][a-z0-9-]{1,15}
 export interface AuditEventBase {
   /** Block sequence (monotonic, per-process for v0.1). */
   seq: number;

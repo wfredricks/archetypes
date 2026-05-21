@@ -18,6 +18,16 @@
 
 import { resolveUrl } from '../url.js';
 import { setEntry } from '../credentials.js';
+// @adopt:composes:identity
+// Q: Which identity archetype's HTTP client does the CLI compose?
+// Default: simple-auth (via SIIdentityClient — typed wrapper around the
+//          identity service's /auth/request-code, /auth/verify-code, and
+//          /resolve endpoints).
+// Reference: archetypes/simple-auth/ARCHETYPE.md
+// Notes: Replacing the identity archetype means replacing this client with
+//        one that exposes equivalent shapes (`requestCode`, `verifyCode`,
+//        `resolve`, `grant`, `revoke`). The token shape returned by
+//        verifyCode is what gets cached in ~/.si/credentials.
 import { SIIdentityClient, SIHttpError } from '../http.js';
 import { promptEmail, promptCode } from '../prompts.js';
 

@@ -14,8 +14,23 @@
 
 import type { Context } from 'hono';
 import { appendGrant, appendRevoke, listGrants } from './grants.js';
+// @adopt:composes:audit-ledger
+// Q: Which audit-ledger archetype does this project compose?
+// Default: simple-ledger via ./audit.js (chainblocks-shaped; see audit.ts).
+// Reference: archetypes/simple-ledger/ARCHETYPE.md (pending)
+// Notes: Replace `./audit.js` with another ledger client that returns a
+//        monotonic block sequence number from each emit call. The ledger
+//        row appended to `./grants.js` embeds that number as `auditBlock`
+//        — the cross-reference is the load-bearing contract.
 import { emitGrantEvent, emitRevokeEvent } from './audit.js';
 import { ROLES, type Role } from './types.js';
+// @adopt:composes:identity
+// Q: Which identity archetype does this project compose?
+// Default: simple-auth (verifyToken + getAuthKeyStore are bangauth-derived).
+// Reference: archetypes/simple-auth/ARCHETYPE.md
+// Notes: Any identity replacement must export a verify function that
+//        returns { valid, email, projectId, ... } and a key-store accessor
+//        so the grant/revoke endpoints can authenticate the caller.
 import { verifyToken } from './auth/token.js';
 import { getAuthKeyStore } from './auth/server.js';
 

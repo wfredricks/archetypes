@@ -11,6 +11,14 @@
  */
 
 import type { Context } from 'hono';
+// @adopt:composes:identity
+// Q: Which identity archetype does this project compose?
+// Default: simple-auth (verifyToken + getAuthKeyStore are bangauth-derived).
+// Reference: archetypes/simple-auth/ARCHETYPE.md
+// Notes: /resolve is the canonical "token → userId + roles" endpoint every
+//        downstream SI service hits. The identity contract on this side is
+//        narrow: a verify function that returns the email and projectId
+//        encoded into the token, plus the matching key store.
 import { verifyToken } from './auth/token.js';
 import { getAuthKeyStore } from './auth/server.js';
 import { effectiveRoles } from './grants.js';

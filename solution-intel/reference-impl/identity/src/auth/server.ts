@@ -29,6 +29,20 @@
  *     side effects at import time.
  */
 
+// @adopt:composes:identity
+// Q: Which identity archetype does this project compose?
+// Default: simple-auth (passwordless email-and-code authentication via the
+//          bangauth reference implementation; HMAC-SHA256 deterministic tokens
+//          with monthly key rotation; see archetypes/simple-auth/ARCHETYPE.md).
+// Reference: archetypes/simple-auth/ARCHETYPE.md
+// Notes: This block of imports IS the simple-auth adoption. Replacing them
+//        with another identity adapter (OIDC, SAML, WebAuthn, magic-link)
+//        is the seam. Keep the contract surface stable: a KeyStore, a
+//        UserStore, a token generator/verifier, and an email-or-equivalent
+//        challenge transport. The grants/resolve layer below depends only
+//        on `KeyStore` + `generateToken` / `verifyToken` semantics.
+// Alternatives: any archetype whose contract satisfies the identity role.
+//               Currently registered: simple-auth (this).
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { randomBytes } from 'node:crypto';
@@ -66,13 +80,38 @@ export interface AuthConfig {
  */
 export function loadAuthConfig(): AuthConfig {
   return {
+    // @adopt:app-name
+    // Q: What's the human-readable name of your project?
+    //    Shown in emails and log lines emitted by the identity service.
+    // Default: Solution Intelligence
+    // Format: free text, 2-60 chars
     appName: process.env.SI_APP_NAME ?? 'Solution Intelligence',
+    // @adopt:project-id
+    // Q: What's the default project id embedded in every issued token?
+    //    SI's 5-role grant ledger is scoped by this id; tokens issued under
+    //    one project-id are not honored under another.
+    // Default: si-default
+    // Format: [a-z][a-z0-9-]{2,31}
     projectId: process.env.SI_PROJECT_ID ?? 'si-default',
+    // @adopt:allowed-email-domains
+    // Q: Which email domains are allowed to request access codes?
+    //    Comma-separated; supports `*` (wildcard), `*.tld`, `*sub*` patterns.
+    //    For a private deployment, narrow this to your org's domain(s).
+    // Default: * (all domains accepted — dev-mode posture)
     allowedDomains: (process.env.SI_ALLOWED_DOMAINS ?? '*')
       .split(',')
       .map((d) => d.trim())
       .filter(Boolean),
+    // @adopt:login-url
+    // Q: What public URL serves the identity service's login surface?
+    //    Embedded in outgoing emails so users can click through.
+    // Default: http://localhost:3001/auth/login (dev-mode posture)
+    // Format: absolute URL
     loginUrl: process.env.SI_LOGIN_URL ?? 'http://localhost:3001/auth/login',
+    // @adopt:support-email
+    // Q: What support mailbox is shown in rejection emails?
+    //    Empty default hides the line; set this for any real deployment.
+    // Default: (empty)
     supportEmail: process.env.SI_SUPPORT_EMAIL ?? '',
   };
 }

@@ -23,6 +23,13 @@ import { revokeCommand } from './commands/revoke.js';
 
 const program = new Command();
 
+// @adopt:cli-binary-name
+// Q: What's the command-line tool's invocation name?
+//    Wired into package.json#bin (the bin shim symlink) and into the
+//    Commander program name (used in help text and error prefixes).
+//    Keep aligned with @adopt:namespace in identity/src/index.ts.
+// Default: si
+// Format: [a-z][a-z0-9-]{1,15}
 program
   .name('si')
   .description('Solution Intelligence CLI')
