@@ -73,9 +73,33 @@ Loads archetype contracts (LEFT-BOOKEND.md → SIG) via the
 `@asi/contract-loader` package. Currently loads `events-spine` and
 `simple-auth`; extend as new archetypes graduate.
 
+**Backend-pluggable since Phase 3a (2026-05-22).** The script lifts the
+`selectBackend` env-var pattern from
+`contract-loader/src/backends/select.ts`, so adopters can route the
+same canonical script to either Neo4j (asi's default — preserves the
+Phase 1c path against constellation-neo4j) or PolyGraph (embedded
+leveldb — what `dla-stores-solution-intelligence` adopts at Phase 2.0).
+
 ```bash
+# Neo4j (default; preserves prior behavior):
 npx tsx scripts/load-contracts.ts
+
+# PolyGraph (embedded leveldb at data/polygraph/):
+SI_BACKEND=polygraph SI_POLYGRAPH_PATH=data/polygraph \
+  npx tsx scripts/load-contracts.ts
 ```
+
+Env vars (precedence: `SI_*` over legacy `ASI_*`; both honored during
+the asi → solution-intel name transition):
+
+| Var | Used by | Default |
+|---|---|---|
+| `SI_BACKEND`         | both     | `'neo4j'` |
+| `SI_POLYGRAPH_PATH`  | PolyGraph | required when `SI_BACKEND=polygraph` |
+| `SI_NAMESPACE`       | both     | `'@adopt:default-namespace'` |
+| `SI_GRAPH_URL`       | Neo4j    | `bolt://localhost:7689` |
+| `SI_GRAPH_USER`      | Neo4j    | `neo4j` |
+| `SI_GRAPH_PASS`      | Neo4j    | `udt-pass-2026` |
 
 **Idempotent.** Each contract is committed with `contractId + namespace`
 scope; re-running re-creates the same sub-graph.

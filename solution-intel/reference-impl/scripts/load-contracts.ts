@@ -2,15 +2,16 @@
  * Provenance:
  *   Lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
  *   from wfredricks/archetypes-solution-intelligence/scripts/load-contracts.ts
- *   @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60.
+ *   @ commit bcc7c58 (Phase 3a §3a.1 backend-pluggable refresh).
  *
  *   Ownership: solution-intel canonical. Adopter copies replace the
- *   `'@adopt:...'` placeholder strings (and the ASI_-prefixed env vars)
- *   with adopter-specific values before running.
+ *   `'@adopt:...'` placeholder strings (and the `SI_`-prefixed env vars
+ *   where adopters use a different prefix) with adopter-specific values
+ *   before running.
  */
 
 /**
- * Loads archetype contracts into the asi SIG.
+ * Loads archetype contracts into the SIG.
  *
  * // Why: Task 3 (BUILD-TASK-3-SIG-CONTRACTS-PLAN.md §Phase F) makes the
  * // SIG+SDD+DSD loop operational. This script is the canonical bootstrap
@@ -19,12 +20,27 @@
  * // simple-auth. Re-running is safe: each commit is idempotent per
  * // contractId.
  *
+ * // Why backend-pluggable: Phase 3a is the proof point that adopters
+ * // who choose PolyGraph (no external Neo4j) can run the canonical
+ * // contract loader unchanged. The kind selection follows the same
+ * // env-var pattern `contract-loader/src/backends/select.ts` already
+ * // documents, so callers of `commitContract` see no surface change.
+ *
  * // Usage:
  * //   npx tsx scripts/load-contracts.ts
  * //
  * // Override the bookend list via positional args (paths to
  * // LEFT-BOOKEND.md files):
  * //   npx tsx scripts/load-contracts.ts <path1> <path2> ...
+ * //
+ * // Env vars (precedence: SI_* > legacy ASI_*; both supported during
+ * // the asi → solution-intel name transition):
+ * //   SI_BACKEND          'neo4j' | 'polygraph'   (default 'neo4j')
+ * //   SI_POLYGRAPH_PATH   leveldb directory       (required when SI_BACKEND=polygraph)
+ * //   SI_NAMESPACE        Solution-root namespace (default '@adopt:default-namespace')
+ * //   SI_GRAPH_URL        Bolt URL                (Neo4j only)
+ * //   SI_GRAPH_USER       Auth user               (Neo4j only)
+ * //   SI_GRAPH_PASS       Auth password           (Neo4j only)
  *
  * @module scripts/load-contracts
  */
@@ -33,16 +49,32 @@ import { resolve } from 'node:path';
 import neo4j from 'neo4j-driver';
 
 import { parseBookend, commitContract } from '../contract-loader/src/index.js';
+import { selectBackend } from '../contract-loader/src/backends/select.js';
+import type { BackendOptions } from '../contract-loader/src/backends/types.js';
 
-// @adopt:default-namespace  Replace 'asi' with the adopter's namespace; replace ASI_ prefix with the adopter's env-var prefix.
-const NAMESPACE = process.env.ASI_NAMESPACE ?? '@adopt:default-namespace';
-// @adopt:default-graph-url  Replace 'bolt://localhost:7689' with the adopter's PolyGraph Bolt endpoint.
-const GRAPH_URL = process.env.ASI_GRAPH_URL ?? 'bolt://localhost:7689';
-// @adopt:default-graph-user  Replace 'neo4j' if the adopter's PolyGraph uses a non-default user.
-const GRAPH_USER = process.env.ASI_GRAPH_USER ?? 'neo4j';
-// @adopt:default-graph-pass  Replace 'udt-pass-2026' with the adopter's PolyGraph password (do NOT commit secrets).
-const GRAPH_PASS = process.env.ASI_GRAPH_PASS ?? 'udt-pass-2026';
+// @adopt:default-namespace  Replace 'asi' with the adopter's namespace; the SI_ env-var prefix is shared across solution-intel adopters.
+const NAMESPACE =
+  process.env.SI_NAMESPACE ?? process.env.ASI_NAMESPACE ?? '@adopt:default-namespace';
+// @adopt:default-backend  Replace 'neo4j' with the adopter's default backend kind ('neo4j' | 'polygraph').
+const BACKEND_KIND = ((): 'neo4j' | 'polygraph' => {
+  const raw = (process.env.SI_BACKEND ?? '').toLowerCase();
+  if (raw === 'polygraph') return 'polygraph';
+  if (raw === 'neo4j') return 'neo4j';
+  return 'neo4j';
+})();
+// @adopt:default-polygraph-path  Replace undefined with the adopter's default leveldb directory (e.g. 'data/polygraph') when using PolyGraph.
+const POLYGRAPH_PATH = process.env.SI_POLYGRAPH_PATH;
+// @adopt:default-graph-url  Replace 'bolt://localhost:7689' with the adopter's Bolt endpoint when using Neo4j.
+const GRAPH_URL =
+  process.env.SI_GRAPH_URL ?? process.env.ASI_GRAPH_URL ?? 'bolt://localhost:7689';
+// @adopt:default-graph-user  Replace 'neo4j' if the adopter's Neo4j uses a non-default user.
+const GRAPH_USER =
+  process.env.SI_GRAPH_USER ?? process.env.ASI_GRAPH_USER ?? 'neo4j';
+// @adopt:default-graph-pass  Replace 'udt-pass-2026' with the adopter's password (do NOT commit secrets).
+const GRAPH_PASS =
+  process.env.SI_GRAPH_PASS ?? process.env.ASI_GRAPH_PASS ?? 'udt-pass-2026';
 
+// @adopt:default-bookends  Replace with the adopter's archetype LEFT-BOOKEND.md paths (absolute or relative to the script directory).
 const DEFAULT_BOOKENDS = [
   '/Users/williamfredricks/.openclaw/workspace/artifacts/archetypes/events-spine/LEFT-BOOKEND.md',
   '/Users/williamfredricks/.openclaw/workspace/artifacts/archetypes/simple-auth/LEFT-BOOKEND.md',
@@ -52,10 +84,42 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const bookendPaths = (args.length > 0 ? args : DEFAULT_BOOKENDS).map((p) => resolve(p));
 
-  console.log(`[load-contracts] namespace=${NAMESPACE} graph=${GRAPH_URL}`);
+  const baseOptions: BackendOptions = {
+    backend: BACKEND_KIND,
+    graphUrl: GRAPH_URL,
+    graphUser: GRAPH_USER,
+    graphPass: GRAPH_PASS,
+    polygraphPath: POLYGRAPH_PATH,
+  };
+
+  if (BACKEND_KIND === 'polygraph') {
+    console.log(
+      `[load-contracts] namespace=${NAMESPACE} backend=polygraph path=${POLYGRAPH_PATH ?? '<unset>'}`,
+    );
+  } else {
+    console.log(
+      `[load-contracts] namespace=${NAMESPACE} backend=neo4j graph=${GRAPH_URL}`,
+    );
+  }
   console.log(`[load-contracts] loading ${bookendPaths.length} bookend(s)`);
 
-  const driver = neo4j.driver(GRAPH_URL, neo4j.auth.basic(GRAPH_USER, GRAPH_PASS));
+  // // Why call selectBackend() up front: lifts the same Phase 1e
+  // // selection rules the contract-loader uses internally, so a
+  // // misconfigured PolyGraph path or unreachable Bolt URL fails fast
+  // // before we start parsing bookends. We close immediately to release
+  // // the leveldb lock (for PolyGraph) before commitContract reopens it.
+  const probe = await selectBackend(baseOptions);
+  await probe.close();
+
+  // For Neo4j, build a single shared driver to avoid reconnecting per
+  // contract (preserves the pre-Phase-3a driver-sharing perf). For
+  // PolyGraph, each commitContract call opens and closes its own
+  // leveldb instance (sequential — no lock contention).
+  let driver: import('neo4j-driver').Driver | undefined;
+  if (BACKEND_KIND === 'neo4j') {
+    driver = neo4j.driver(GRAPH_URL, neo4j.auth.basic(GRAPH_USER, GRAPH_PASS));
+  }
+
   let totalNodes = 0;
   let totalEdges = 0;
   try {
@@ -64,7 +128,18 @@ async function main(): Promise<void> {
       const graph = parseBookend(path);
       const summary = await commitContract(graph, {
         namespace: NAMESPACE,
-        driver,
+        // For Neo4j: pass the shared driver (back-compat path).
+        // For PolyGraph: pass backend kind + path; commitContract
+        // selects PolyGraphBackend internally.
+        ...(driver
+          ? { driver }
+          : {
+              backend: BACKEND_KIND,
+              polygraphPath: POLYGRAPH_PATH,
+              graphUrl: GRAPH_URL,
+              graphUser: GRAPH_USER,
+              graphPass: GRAPH_PASS,
+            }),
       });
       console.log(
         `[load-contracts]   committed ${summary.contractId}: ${summary.nodeCount} nodes, ${summary.edgeCount} edges (anchored to "${summary.anchoredTo}")`,
@@ -83,7 +158,7 @@ async function main(): Promise<void> {
       `[load-contracts] done: ${bookendPaths.length} contracts, ${totalNodes} nodes, ${totalEdges} edges`,
     );
   } finally {
-    await driver.close();
+    if (driver) await driver.close();
   }
 }
 
