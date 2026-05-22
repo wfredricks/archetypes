@@ -31,7 +31,7 @@ reference_impl:
   # Stage 3 will add a graph path:
   #   - ./reference-impl/graph/    (pending: solution-intelligence-graph)
   in_tree_since: 2026-05-21
-  in_tree_commit_tag: solution-intel-reference-impl-2026-05-22c
+  in_tree_commit_tag: solution-intel-reference-impl-2026-05-22d
   in_tree_amendments:
     - tag: solution-intel-reference-impl-agents-2026-05-22
       added: ./reference-impl/agents/
@@ -45,6 +45,10 @@ reference_impl:
       refreshed: "./reference-impl/contract-loader/ (Phase 1e — backend-pluggable adapter; PolyGraph default in the canonical archetype; new @adopt:default-backend marker; public function signatures unchanged)"
       added: "src/backends/{types,select,neo4j-backend,polygraph-backend}.ts, tests/backends-differential.test.ts, polygraph-db@^0.1.4 dependency"
       source: "wfredricks/archetypes-solution-intelligence @ commit 3dbc71a2110a3b6a7d5f5422488102c2a4daf4e8"
+    - tag: solution-intel-reference-impl-2026-05-22d
+      refreshed: "./reference-impl/agents/ (Phase 2.5 — backend-pluggable adapter lifted from contract-loader; PolyGraph default in the canonical archetype; new @adopt:default-backend marker; public function signatures of runCompletenessAgent / runBookendAuditAgent unchanged)"
+      added: "agents/src/backends/{types,select,neo4j-backend,polygraph-backend}.ts, agents/tests/backends-differential.test.ts, polygraph-db@^0.1.4 dependency, two new Backend.native helpers (countOutgoingRels, countIncomingRels) for the three aggregation rules"
+      source: "wfredricks/archetypes-solution-intelligence @ commit cc6bc8687ee61e17994a65e2f7be92d065155a8f"
 
 adopters: []  # populated when the archetypes registry adopts solution-intel on itself
 
@@ -55,7 +59,7 @@ trigger_conditions_for_full_lift:
   - solution-intelligence-cli at >=0.2.0-pre        # ✅
   - solution-intelligence-graph-client at >=0.1.0-pre  # ✅
   - events-spine adopted into SI/I (Stage 2d)      # ✅ (2026-05-21)
-  - solution-intelligence-agents at >=0.1.0-pre    # ✅ (Phase 1b, 2026-05-22)
+  - solution-intelligence-agents at >=0.2.0-pre    # ✅ (Phase 2.5, 2026-05-22 — backend-pluggable)
   - solution-intelligence-graph shipped (Stage 3)  # ⏳
 
 future_compositions_to_recognize:
