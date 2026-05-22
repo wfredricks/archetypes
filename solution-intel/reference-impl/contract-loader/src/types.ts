@@ -1,16 +1,17 @@
 /**
  * Provenance:
+ *   Originated 2026-05-21 in archetypes-solution-intelligence (asi adoption)
+ *   under BUILD-TASK-3-SIG-CONTRACTS-PLAN.md. Realizes the
+ *   ArchiMate-flavored SIG ontology extensions committed to in
+ *   `archetypes/events-spine/LEFT-BOOKEND.md`.
+ *
  *   Lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
- *   from wfredricks/archetypes-solution-intelligence/contract-loader/src/types.ts
- *   @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60.
+ *   (Phase 1e canonical refresh; tag `solution-intel-reference-impl-2026-05-22c`)
+ *   from wfredricks/archetypes-solution-intelligence/contract-loader
+ *   @ commit 3dbc71a2110a3b6a7d5f5422488102c2a4daf4e8.
  *
- *   Realizes the ArchiMate-flavored SIG ontology extensions exemplified
- *   in `archetypes/events-spine/LEFT-BOOKEND.md` and recorded in
- *   `~/.openclaw/workspace/memory/backlog-sig-archimate-ontology-2026-05-21.md`.
- *
- *   Ownership: solution-intel canonical. Adopter copies replace
- *   `@adopt:` markers with adopter-specific values. The ontology shape
- *   itself is invariant (no `@adopt:` markers in this file).
+ *   Ownership: solution-intel canonical. The ontology shape itself is
+ *   invariant (no `@adopt:` markers in this file).
  */
 
 /**

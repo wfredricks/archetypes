@@ -1,14 +1,19 @@
 /**
  * Provenance:
- *   Lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
- *   from wfredricks/archetypes-solution-intelligence/contract-loader/src/parse-bookend.ts
- *   @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60.
+ *   Originated 2026-05-21 in archetypes-solution-intelligence (asi adoption)
+ *   under BUILD-TASK-3-SIG-CONTRACTS-PLAN.md §Phase C.
  *
- *   Ownership: solution-intel canonical. Parser tolerance is deliberately
- *   narrow — it targets the LEFT-BOOKEND.md shape codified in
- *   METHODOLOGY.md §Bookends and exemplified by events-spine/LEFT-BOOKEND.md
- *   (the canonical instance going forward). No `@adopt:` markers: parsing
- *   shape is archetype-invariant.
+ *   Lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
+ *   (Phase 1e canonical refresh; previous lift was 2026-05-22 "22b";
+ *   this refresh is tag `solution-intel-reference-impl-2026-05-22c`)
+ *   from wfredricks/archetypes-solution-intelligence/contract-loader
+ *   @ commit 3dbc71a2110a3b6a7d5f5422488102c2a4daf4e8.
+ *
+ *   Ownership: solution-intel canonical. Parser tolerance is
+ *   deliberately narrow — it targets the LEFT-BOOKEND.md shape codified
+ *   in METHODOLOGY.md §Bookends and exemplified by
+ *   events-spine/LEFT-BOOKEND.md (the canonical instance going forward).
+ *   No `@adopt:` markers in this file: parsing is invariant.
  */
 
 /**

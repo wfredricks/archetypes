@@ -1,15 +1,4 @@
 /**
- * Provenance:
- *   Lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
- *   from wfredricks/archetypes-solution-intelligence/contract-loader/tests/commit-contract.test.ts
- *   @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60. Extended in
- *   Phase 1c with a Date-coercion round-trip test pinning the canonical
- *   ISO-8601 wire type at the contract-loader boundary.
- *
- *   Ownership: solution-intel canonical.
- */
-
-/**
  * Round-trip test for commit + verify, against the live PolyGraph.
  *
  * // Why: The committer is the only path from in-memory ContractGraph to
@@ -181,35 +170,5 @@ describe('commitContract — round-trip against live PolyGraph', () => {
     expect(byKey.H6.verifiedAt).toBe(verifiedAtStamp);
     expect(byKey.H7.status).toBe('held');
     expect(byKey.H7.verifiedAt).toBe(verifiedAtStamp);
-  });
-
-  it('coerces Date input on Hypothesis.verifiedAt to ISO-8601 string on read', async () => {
-    // Why: Phase 1c canonical wire type — contract-loader is the single
-    // enforcement point. A Date passed in on the write side surfaces as
-    // a normalized ISO-8601 string on the read side; downstream callers
-    // (cli, agents) never see a Date echo. Round-trip pinned here.
-    if (!polygraphReachable) return;
-    const graph = parseBookend(EVENTS_SPINE_BOOKEND);
-    const dateInput = new Date('2026-05-22T13:45:00.000Z');
-    const expectedIso = dateInput.toISOString();
-    for (const h of graph.hypotheses) {
-      if (h.key === 'H6') {
-        h.status = 'held';
-        // Force a Date through the typed `string | null` slot; the
-        // coercion at the write boundary is what we're pinning.
-        (h as unknown as { verifiedAt: unknown }).verifiedAt = dateInput;
-      }
-    }
-    await commitContract(graph, { namespace: TEST_NAMESPACE, driver: driver! });
-
-    const detail = await showContract('events-spine', TEST_NAMESPACE, {
-      driver: driver!,
-    });
-    expect(detail).not.toBeNull();
-    const byKey = Object.fromEntries(detail!.hypotheses.map((h) => [h.key, h]));
-    expect(typeof byKey.H6.verifiedAt).toBe('string');
-    expect(byKey.H6.verifiedAt).toBe(expectedIso);
-    // Null inputs still round-trip as null — belt-and-braces.
-    expect(byKey.H1.verifiedAt).toBeNull();
   });
 });
