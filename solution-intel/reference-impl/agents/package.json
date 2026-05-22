@@ -1,6 +1,6 @@
 {
   "name": "@solution-intelligence/agents",
-  "version": "0.1.0-pre",
+  "version": "0.2.0-pre",
   "description": "Pure-read agents that walk a Solution Intelligence Graph (SIG) and emit reports. CompletenessAgent surfaces hypothesis/contract gaps; BookendAuditAgent diffs SIG-regenerated right-bookend snapshots against committed files.",
   "author": "William Fredricks",
   "license": "Apache-2.0",
@@ -46,7 +46,8 @@
   },
   "dependencies": {
     "@solution-intelligence/contract-loader": "file:../contract-loader",
-    "neo4j-driver": "^5.27.0"
+    "neo4j-driver": "^5.27.0",
+    "polygraph-db": "^0.1.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
