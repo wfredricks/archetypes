@@ -60,6 +60,19 @@ post-login `recordLogin()` path emitting `si.identity.login.completed`. The
 event payload MUST NOT contain bearer tokens, login codes, or other
 credentials (Constraint C5).
 
+> **Trade-off — graceful-no-op vs. propagate.** If your domain treats
+> events as **observability** (the audit ledger or DB write is the
+> correctness contract; events inform subscribers), wrap `publish` in
+> graceful-no-op semantics: catch + log + return. Publisher failures
+> must not fail user-facing operations. SI/I (Stage 2d) chose this
+> path: NATS unavailable → events disabled, login/grant/revoke still
+> work, audit ledger still writes.
+>
+> If your domain treats events as **part of the correctness contract**
+> (e.g. saga participants, distributed transactions), propagate the
+> failure: let the caller decide whether to retry, fail closed, or
+> compensate. Adopters should make this call explicit per service.
+
 ## 5. Verification
 
 Spin up the Scribe with the file backend. Trigger the state change. Verify

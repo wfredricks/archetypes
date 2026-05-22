@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+**Phase 1a polish batch.** See [`artifacts/si-runtime/BUILD-PHASE-1A-PLAN.md`](../../si-runtime/BUILD-PHASE-1A-PLAN.md).
+
+### Changed
+
+- **`reference-impl/tests/integration/_harness.ts`** — `hasNatsOption()` gains a CI-aware guard: on GitHub Actions runners (`CI === 'true'`) with no local NATS server reachable, the function returns `false` so `describe.skipIf` lets the integration suite skip cleanly instead of red-failing on Docker-NATS race conditions. Lifted from SI/I Stage 2d (the first adopter); future adopters now inherit the behavior. Behavior unchanged for local development (no `CI` env var). **F2**.
+- **`ADOPTION-RECIPE.md`** §"4. First publisher" — added a `> Note:` callout documenting the graceful-no-op vs. propagate trade-off for publisher failures, sourced from Stage 2d FINDINGS. **F5**.
+
 ## 0.1.0-pre — 2026-05-21
 
 Initial release. Reference implementation in TypeScript.
