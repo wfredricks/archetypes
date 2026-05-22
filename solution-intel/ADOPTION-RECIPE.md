@@ -43,7 +43,38 @@ Per METHODOLOGY.md §Marking conventions, every copied file gets a JSDoc header 
 
 Headers go on every adapted source file, including tests. This is the audit trail; skipping it breaks the methodology's compounding-quality property.
 
-## Step 3 — Configure agents
+## Step 3 — Configure `contract-loader`
+
+As of the 2026-05-22b reference-impl tag the archetype ships a
+`contract-loader/` package (snapshot of the asi-profile package; lifted
+Phase 1c). It is the **single enforcement point** for the
+`Hypothesis.verifiedAt` storage type at the contract-loader boundary;
+canonical wire type is ISO-8601 string. Copy the directory the same
+way as Step 1 (`target-repo/contract-loader/`), then:
+
+1. Re-apply provenance JSDoc headers per Step 2 (note the lift tag:
+   `solution-intel-reference-impl-2026-05-22b`).
+2. Answer the package's `@adopt:` markers as part of Step 4 below —
+   the package-level ones are `@adopt:default-graph-url`,
+   `@adopt:default-graph-user`, `@adopt:default-graph-pass`. The
+   namespace is supplied by callers (CLI flag, env var, or programmatic
+   option), not by the contract-loader itself.
+3. The contract-loader's surface is:
+   - `parseBookend(path)` — LEFT-BOOKEND.md → in-memory `ContractGraph`.
+   - `commitContract(graph, options)` — idempotent writer.
+   - `verifyContract(…)`, `listContracts(…)`, `showContract(…)` — read helpers used by `<binary> contracts …`.
+4. The `cli/src/commands/contracts.ts` and the `BookendAuditAgent`
+   both depend on this package. Update the adopter's package scope in
+   `package.json` (`@solution-intelligence/contract-loader` → e.g.
+   `@<adopter>/contract-loader`) and align the imports in the cli + agents
+   packages accordingly.
+
+The `verifiedAt` harmonization means downstream layers (cli, agents)
+see only `string | null` for that field. The agents package keeps a
+defensive `normalizeIsoString` belt-and-braces helper; you should not
+need to touch it, but leave it in place.
+
+## Step 3.b — Configure agents
 
 As of v0.1.0-pre the archetype ships two pure-read agents in
 `./reference-impl/agents/` (snapshot of the asi-profile package; lifted
@@ -78,7 +109,7 @@ different, write-capable tool) decision.
 ## Step 4 — Scan for `@adopt:` markers
 
 ```sh
-grep -rn "@adopt:" target-repo/{identity,cli,graph-client,agents}/src/
+grep -rn "@adopt:" target-repo/{identity,cli,graph-client,agents,contract-loader,scripts}/
 ```
 
 Two categories of marker appear:

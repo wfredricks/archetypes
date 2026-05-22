@@ -105,16 +105,18 @@ out-of-band SIG writes.
 
 ## Reference implementation
 
-The canonical reference lives **in-tree** as of 2026-05-21 under `./reference-impl/`. Three of the four substrate pieces are present; the fourth (the graph server) lands at Stage 3.
+The canonical reference lives **in-tree** as of 2026-05-21 (Phase 1c refresh 2026-05-22) under `./reference-impl/`. Five of the six substrate pieces are present (identity, cli, graph-client, agents, contract-loader, scripts); the sixth (the graph server) lands at Stage 3.
 
 ### Reference-implementation status
 
 | Piece | Status | Path |
 |---|---|---|
-| `identity` (SI/I) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-identity` @ 0.2.0-pre) | `./reference-impl/identity/` |
-| `cli` (SI CLI) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-cli` @ 0.2.1-pre) | `./reference-impl/cli/` |
+| `identity` (SI/I) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-identity` @ 0.2.0-pre + Phase 1a F4 fix lifted 2026-05-22) | `./reference-impl/identity/` |
+| `cli` (SI CLI) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-cli` @ 0.2.1-pre + Phase 1c additions of `commands/contracts.ts` and `commands/agents.ts`, lifted 2026-05-22) | `./reference-impl/cli/` |
 | `graph-client` (SI/G-client) | ✅ in-tree (snapshot of `wfredricks/solution-intelligence-graph-client` @ 0.1.0-pre; scaffold-only) | `./reference-impl/graph-client/` |
 | `agents` (SI agents) | ✅ in-tree (snapshot of `wfredricks/archetypes-solution-intelligence/agents/` @ 0.1.0-pre; Phase 1b, 2026-05-22) | `./reference-impl/agents/` |
+| `contract-loader` (SI contract loader) | ✅ in-tree (snapshot of `wfredricks/archetypes-solution-intelligence/contract-loader/` @ 0.1.0-pre; Phase 1c, 2026-05-22). Canonical wire type for `Hypothesis.verifiedAt` is ISO-8601 string at this package's boundary. | `./reference-impl/contract-loader/` |
+| `scripts` (adoption ops scripts) | ✅ in-tree (template snapshot lifted Phase 1c, 2026-05-22). Adopter values converted to `'@adopt:...'` placeholder literals. | `./reference-impl/scripts/` |
 | `graph` (SI/G server) | ⏳ pending Stage 3 (chainblocks → simple-ledger → SI/G) | not yet present |
 
 The original `wfredricks/solution-intelligence-*` repos remain as historical artifacts; the in-tree copy is the canonical reference going forward. See `./reference-impl/POINTER.md` for the one-line note.
@@ -134,7 +136,7 @@ This is the SIG + SDD + DSD closed loop in concrete form. The substrate hosts th
 - `ARCHETYPE.md` (this file — sketch with agents drafted)
 - `ARCHETYPE.yaml` (sketch metadata; finalized at full lift)
 - `reference-impl/POINTER.md` (pointer to the SI repo family)
-- `reference-impl/{identity, cli, graph-client, agents}/` — four of five substrate pieces in-tree
+- `reference-impl/{identity, cli, graph-client, agents, contract-loader, scripts}/` — six of seven substrate pieces in-tree (Phase 1c, 2026-05-22)
 - No DEFECTS.md / ADOPTIONS.md yet — those land at full lift
 - `ADOPTION-RECIPE.md` sketch; full recipe deferred to full lift
 

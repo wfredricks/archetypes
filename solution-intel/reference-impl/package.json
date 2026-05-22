@@ -1,0 +1,15 @@
+{
+  "name": "@adopt:adopter-name",
+  "version": "0.1.0-pre",
+  "private": true,
+  "description": "Top-level umbrella for an adoption of the solution-intel archetype. Holds the seed script and shared dev deps. Adopters replace @adopt:adopter-name with their own npm-style package name (e.g. 'archetypes-solution-intelligence').",
+  "scripts": {
+    "seed": "tsx scripts/seed-solution.ts"
+  },
+  "devDependencies": {
+    "neo4j-driver": "^5.27.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^20.0.0"
+  }
+}
