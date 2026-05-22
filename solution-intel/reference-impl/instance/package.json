@@ -1,0 +1,66 @@
+{
+  "name": "@solution-intelligence/instance",
+  "version": "0.1.0-pre",
+  "description": "Whole-instance export/import skeleton for solution-intel SI instances. Produces a portable tar.gz carrying SIG + audit ledger + identity records + resolved markers + schema-version stamp; consumes it back. Backend-agnostic format (PolyGraph + Neo4j). Empty migrations catalog (v0.2.0-pre baseline).",
+  "author": "William Fredricks",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wfredricks/archetypes.git",
+    "directory": "solution-intel/reference-impl/instance"
+  },
+  "homepage": "https://github.com/wfredricks/archetypes#readme",
+  "bugs": {
+    "url": "https://github.com/wfredricks/archetypes/issues"
+  },
+  "keywords": [
+    "solution-intelligence",
+    "solution-intel",
+    "instance",
+    "export",
+    "import",
+    "snapshot",
+    "portability",
+    "sig",
+    "polygraph",
+    "neo4j",
+    "typescript"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "@solution-intelligence/contract-loader": "file:../contract-loader",
+    "neo4j-driver": "^5.27.0",
+    "polygraph-db": "file:../../../../polygraph"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}

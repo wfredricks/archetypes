@@ -122,6 +122,43 @@ Both agents are read-only on the SIG; neither commits a refreshed
 snapshot or rewrites graph state. Repair is always a human (or a
 different, write-capable tool) decision.
 
+## Step 3.c — Configure instance export/import
+
+As of v0.1.0-pre the archetype ships an instance package in
+`./reference-impl/instance/` (lifted 2026-05-22 at tag
+`solution-intel-reference-impl-2026-05-22g`). It implements the
+whole-instance snapshot contract from `INSTANCE-PORTABILITY.md`.
+Copy the directory the same way as Step 1 (`target-repo/instance/`),
+then:
+
+1. Re-apply provenance JSDoc headers per Step 2 (note the instance
+   lift tag: `solution-intel-reference-impl-2026-05-22g`).
+2. Answer the instance's `@adopt:` markers as part of Step 4 below —
+   the key ones are `@adopt:default-substrate-version`,
+   `@adopt:default-instance-schema-version`, `@adopt:default-audit-path`
+   (must match the identity service's `audit-log-path` resolution),
+   and `@adopt:default-grants-path`.
+3. Wire `exportInstance` and `importInstance` into the project CLI's
+   `instance` command group. The asi adoption's
+   `cli/src/commands/instance.ts` is a reference shape: an `export`
+   subcommand requiring `--output`, an `import` subcommand requiring
+   `--input` and supporting `--force`, with `--backend polygraph|neo4j`,
+   `--polygraph-path`, `--graph-url`, `--audit-path`, `--grants-path`,
+   `--substrate-version`, and `--instance-schema-version` flags.
+
+**Operator cadence:** run `<ns> instance export --output
+data/exports/<timestamp>.tar.gz` before any substrate upgrade and
+before any potentially-destructive operation. The export is the
+rollback handle. Pair with `<ns> instance import data/exports/<file>
+--polygraph-path data/polygraph-restored` against a sibling directory
+to verify the export is good without disturbing production state.
+
+The migrations catalog under `instance/src/migrations/` is empty at
+the Phase 3 baseline (v0.2.0-pre). When the substrate ships its first
+schema change, the migration that bridges the version pair is added
+to the catalog and applied automatically at import time. See the
+migrations `README.md` for the migration interface.
+
 ## Step 4 — Scan for `@adopt:` markers
 
 ```sh
@@ -130,7 +167,7 @@ grep -rn "@adopt:" target-repo/{identity,cli,graph-client,agents,contract-loader
 
 Two categories of marker appear:
 
-- **`@adopt:<key>`** — identity-and-deployment values (namespace, project-id, default-port, service-name, app-name, audit-log-path, grants-ledger-path, cli-binary-name, credentials-dir, project-config-path, default-endpoint-env-var, login-url, support-email, allowed-email-domains, auth-mount-path, event-subject-prefix, graph-endpoint, agent-name-completeness, agent-name-bookend-audit, default-namespace, **default-backend** _(Phase 1e; contract-loader storage selector)_, default-graph-url, default-graph-user, default-graph-pass).
+- **`@adopt:<key>`** — identity-and-deployment values (namespace, project-id, default-port, service-name, app-name, audit-log-path, grants-ledger-path, cli-binary-name, credentials-dir, project-config-path, default-endpoint-env-var, login-url, support-email, allowed-email-domains, auth-mount-path, event-subject-prefix, graph-endpoint, agent-name-completeness, agent-name-bookend-audit, default-namespace, **default-backend** _(Phase 1e; contract-loader storage selector)_, default-graph-url, default-graph-user, default-graph-pass, **default-substrate-version** _(Phase 3; instance manifest stamp)_, **default-instance-schema-version** _(Phase 3)_, **default-audit-path** _(Phase 3)_, **default-grants-path** _(Phase 3)_, **default-export-dir** _(Phase 3)_).
 - **`@adopt:composes:<role>`** — composition sites (identity, audit-ledger, eventing, graph, **storage-backend**).
 
 Build a list. Answer the question in each marker before booting anything.
