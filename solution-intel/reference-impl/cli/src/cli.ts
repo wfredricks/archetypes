@@ -1,5 +1,18 @@
 #!/usr/bin/env node
 /**
+ * Provenance:
+ *   Re-lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
+ *   from wfredricks/archetypes-solution-intelligence/cli/src/cli.ts
+ *   @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60.
+ *
+ *   Ownership: solution-intel canonical. Adopter copies replace
+ *   `@adopt:` markers with adopter-specific values. The Phase 1c lift
+ *   added the `contracts` and `agents` command groups; binary name and
+ *   description remain at archetype defaults (`si` / 'Solution
+ *   Intelligence CLI').
+ */
+
+/**
  * `si` command-line entry point.
  *
  * // Why: This is the bin shim wired up by package.json#bin. We use
@@ -20,6 +33,16 @@ import { VERSION } from './version.js';
 import { loginCommand } from './commands/login.js';
 import { grantCommand } from './commands/grant.js';
 import { revokeCommand } from './commands/revoke.js';
+import {
+  contractsListCommand,
+  contractsShowCommand,
+} from './commands/contracts.js';
+import {
+  agentsListCommand,
+  completenessRunCommand,
+  bookendAuditRunCommand,
+  parseFormat,
+} from './commands/agents.js';
 
 const program = new Command();
 
@@ -123,6 +146,151 @@ program
           url: merged.url,
           project: merged.project,
           grantId: merged.grantId,
+        }),
+      );
+    },
+  );
+
+// ─── contracts ───────────────────────────────────────────────────────
+
+// Why: contracts is the read-side surface for the SIG ontology that the
+//       contract-loader writes into PolyGraph. Two subcommands: `list`
+//       and `show`. The substrate they query is the Solution root +
+//       HAS_CONTRACT edges established by @solution-intelligence/contract-loader.
+//       The `--namespace` default below is an @adopt: marker; adopters
+//       set this to their own Solution namespace.
+
+const contracts = program
+  .command('contracts')
+  .description('Inspect archetype contracts loaded into the SIG');
+
+contracts
+  .command('list')
+  .description('List archetype contracts anchored to the Solution root')
+  .option('--namespace <ns>', 'Solution namespace to query', 'asi')
+  .option('--graph-url <url>', 'Bolt URL (defaults to bolt://localhost:7689 or SI_GRAPH_URL)')
+  .action(async (options: { namespace?: string; graphUrl?: string }) => {
+    process.exit(
+      await contractsListCommand({
+        namespace: options.namespace,
+        graphUrl: options.graphUrl ?? process.env.SI_GRAPH_URL,
+        graphUser: process.env.SI_GRAPH_USER,
+        graphPass: process.env.SI_GRAPH_PASS,
+      }),
+    );
+  });
+
+contracts
+  .command('show <archetype>')
+  .description('Show the structured detail of one archetype contract')
+  .option('--namespace <ns>', 'Solution namespace to query', 'asi')
+  .option('--graph-url <url>', 'Bolt URL (defaults to bolt://localhost:7689 or SI_GRAPH_URL)')
+  .action(
+    async (
+      archetype: string,
+      options: { namespace?: string; graphUrl?: string },
+    ) => {
+      process.exit(
+        await contractsShowCommand(archetype, {
+          namespace: options.namespace,
+          graphUrl: options.graphUrl ?? process.env.SI_GRAPH_URL,
+          graphUser: process.env.SI_GRAPH_USER,
+          graphPass: process.env.SI_GRAPH_PASS,
+        }),
+      );
+    },
+  );
+
+// ─── agents ──────────────────────────────────────────────────────────
+
+// Why: agents is the read-only reports surface. Two agents shipped at
+//       v0.1.0-pre: completeness (SIG walker) and bookend-audit (SIG
+//       vs committed-snapshot diff). The CLI exposes `list` plus
+//       `<name> run` subcommands; reports are reports, so a finding of
+//       severity=error does NOT make the command fail (exit 0 still).
+//       Exit 1 = connection error; exit 2 = bad flag.
+
+const agents = program
+  .command('agents')
+  .description('Read-only agents that walk the SIG and emit reports');
+
+agents
+  .command('list')
+  .description('List available agents')
+  .action(() => {
+    process.exit(agentsListCommand());
+  });
+
+const completeness = agents
+  .command('completeness')
+  .description('CompletenessAgent — surface gaps in archetype contracts (read-only)');
+
+completeness
+  .command('run')
+  .description('Run the CompletenessAgent and print its report')
+  .option('--namespace <ns>', 'Solution namespace to query', 'asi')
+  .option('--graph-url <url>', 'Bolt URL (defaults to bolt://localhost:7689 or SI_GRAPH_URL)')
+  .option('--format <fmt>', 'Output format: markdown | json', 'markdown')
+  .action(
+    async (options: { namespace?: string; graphUrl?: string; format?: string }) => {
+      const format = parseFormat(options.format);
+      if (format === null) {
+        process.stderr.write(
+          `si agents completeness run: unknown --format "${options.format}" (expected markdown|json)\n`,
+        );
+        process.exit(2);
+      }
+      process.exit(
+        await completenessRunCommand({
+          namespace: options.namespace,
+          graphUrl: options.graphUrl ?? process.env.SI_GRAPH_URL,
+          graphUser: process.env.SI_GRAPH_USER,
+          graphPass: process.env.SI_GRAPH_PASS,
+          format,
+        }),
+      );
+    },
+  );
+
+const bookendAudit = agents
+  .command('bookend-audit')
+  .description('BookendAuditAgent — diff a SIG-regenerated snapshot against the committed file');
+
+bookendAudit
+  .command('run')
+  .description('Run the BookendAuditAgent for one archetype and print its report')
+  .option('--archetype <name>', 'Archetype to audit (e.g. events-spine)')
+  .option(
+    '--archetypes-repo <path>',
+    'Path to a wfredricks/archetypes checkout',
+  )
+  .option('--namespace <ns>', 'Solution namespace to query', 'asi')
+  .option('--graph-url <url>', 'Bolt URL (defaults to bolt://localhost:7689 or SI_GRAPH_URL)')
+  .option('--format <fmt>', 'Output format: markdown | json', 'markdown')
+  .action(
+    async (options: {
+      archetype?: string;
+      archetypesRepo?: string;
+      namespace?: string;
+      graphUrl?: string;
+      format?: string;
+    }) => {
+      const format = parseFormat(options.format);
+      if (format === null) {
+        process.stderr.write(
+          `si agents bookend-audit run: unknown --format "${options.format}" (expected markdown|json)\n`,
+        );
+        process.exit(2);
+      }
+      process.exit(
+        await bookendAuditRunCommand({
+          archetype: options.archetype,
+          archetypesRepo: options.archetypesRepo,
+          namespace: options.namespace,
+          graphUrl: options.graphUrl ?? process.env.SI_GRAPH_URL,
+          graphUser: process.env.SI_GRAPH_USER,
+          graphPass: process.env.SI_GRAPH_PASS,
+          format,
         }),
       );
     },

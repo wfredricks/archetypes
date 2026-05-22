@@ -26,14 +26,21 @@ reference_impl:
     - ./reference-impl/cli/
     - ./reference-impl/graph-client/
     - ./reference-impl/agents/
-  # Stage 3 will add a fifth path:
+    - ./reference-impl/contract-loader/
+    - ./reference-impl/scripts/
+  # Stage 3 will add a graph path:
   #   - ./reference-impl/graph/    (pending: solution-intelligence-graph)
   in_tree_since: 2026-05-21
-  in_tree_commit_tag: solution-intel-reference-impl-2026-05-21
+  in_tree_commit_tag: solution-intel-reference-impl-2026-05-22b
   in_tree_amendments:
     - tag: solution-intel-reference-impl-agents-2026-05-22
       added: ./reference-impl/agents/
       source: wfredricks/archetypes-solution-intelligence/agents/ @ 0.1.0-pre
+    - tag: solution-intel-reference-impl-2026-05-22b
+      added: "./reference-impl/contract-loader/, ./reference-impl/scripts/, workspace metadata template"
+      refreshed: "./reference-impl/cli/ (Phase 1c - + commands/contracts.ts + commands/agents.ts; F1 status+verifiedAt render), ./reference-impl/identity/ (Phase 1a F4 tsconfig.eslint.json rootDir fix lifted)"
+      harmonized: "Hypothesis.verifiedAt storage type — canonical wire type is ISO-8601 string at the contract-loader boundary"
+      source: "wfredricks/archetypes-solution-intelligence @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60"
 
 adopters: []  # populated when the archetypes registry adopts solution-intel on itself
 
