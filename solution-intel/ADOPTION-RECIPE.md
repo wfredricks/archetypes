@@ -43,20 +43,52 @@ Per METHODOLOGY.md §Marking conventions, every copied file gets a JSDoc header 
 
 Headers go on every adapted source file, including tests. This is the audit trail; skipping it breaks the methodology's compounding-quality property.
 
-## Step 3 — Scan for `@adopt:` markers
+## Step 3 — Configure agents
+
+As of v0.1.0-pre the archetype ships two pure-read agents in
+`./reference-impl/agents/` (snapshot of the asi-profile package; lifted
+2026-05-22). Copy the directory the same way as Step 1 (`target-repo/agents/`),
+then:
+
+1. Re-apply provenance JSDoc headers per Step 2 (note the agents lift
+   tag: `solution-intel-reference-impl-agents-2026-05-22`).
+2. Answer the agents' `@adopt:` markers as part of Step 4 below — the
+   key ones are `@adopt:default-namespace` (must match `@adopt:namespace`
+   in `identity/src/index.ts`), `@adopt:default-graph-url`, and the
+   `@adopt:default-graph-user/pass` pair.
+3. Wire `runCompletenessAgent` and `runBookendAuditAgent` into the
+   project CLI's `agents` command group. The asi adoption's
+   `cli/src/commands/agents.ts` is a reference shape: one `list`
+   subcommand plus `<agent-name> run` for each agent, accepting
+   `--format markdown|json` and the standard `--namespace/--graph-url`
+   flags.
+
+**Operator cadence:** run `<ns> agents completeness run` at least
+weekly during active development — it catches `partial`/`violated`
+hypotheses, contracts with no hypotheses, and stale `held` rows.
+Run `<ns> agents bookend-audit run --archetype <name>` after every
+writeback to a hypothesis status, or on a CI schedule, to catch drift
+between the SIG and the committed `RIGHT-BOOKEND-snapshot-*.md` files
+in the registry.
+
+Both agents are read-only on the SIG; neither commits a refreshed
+snapshot or rewrites graph state. Repair is always a human (or a
+different, write-capable tool) decision.
+
+## Step 4 — Scan for `@adopt:` markers
 
 ```sh
-grep -rn "@adopt:" target-repo/{identity,cli,graph-client}/src/
+grep -rn "@adopt:" target-repo/{identity,cli,graph-client,agents}/src/
 ```
 
 Two categories of marker appear:
 
-- **`@adopt:<key>`** — identity-and-deployment values (namespace, project-id, default-port, service-name, app-name, audit-log-path, grants-ledger-path, cli-binary-name, credentials-dir, project-config-path, default-endpoint-env-var, login-url, support-email, allowed-email-domains, auth-mount-path, event-subject-prefix, graph-endpoint).
+- **`@adopt:<key>`** — identity-and-deployment values (namespace, project-id, default-port, service-name, app-name, audit-log-path, grants-ledger-path, cli-binary-name, credentials-dir, project-config-path, default-endpoint-env-var, login-url, support-email, allowed-email-domains, auth-mount-path, event-subject-prefix, graph-endpoint, agent-name-completeness, agent-name-bookend-audit, default-namespace, default-graph-url, default-graph-user, default-graph-pass).
 - **`@adopt:composes:<role>`** — composition sites (identity, audit-ledger, eventing, graph).
 
 Build a list. Answer the question in each marker before booting anything.
 
-## Step 4 — Answer the markers
+## Step 5 — Answer the markers
 
 For each marker:
 
@@ -69,12 +101,13 @@ For each marker:
 
 For composition markers, the default values point at the reference archetype (simple-auth, simple-ledger, graph-db, events-spine pending). To swap in a different archetype, replace the imports at the marker site with the chosen archetype's reference-impl imports; the surrounding code expects the same contract surface.
 
-## Step 5 — Install dependencies and configure the substrate
+## Step 6 — Install dependencies and configure the substrate
 
 ```sh
 cd target-repo/identity && npm install
 cd target-repo/cli && npm install
 cd target-repo/graph-client && npm install
+cd target-repo/agents && npm install
 ```
 
 Configure via env vars (the default surface; the markers above name each one) or via the project's `.<ns>/config.yaml` (where `<ns>` is your `@adopt:namespace` answer).
@@ -87,7 +120,7 @@ Minimum configuration:
 - `<NS>_GRANTS_PATH` — persistent path for the role-grant ledger JSONL
 - `<NS>_URL` (CLI side) — base URL of the identity service
 
-## Step 6 — Boot identity → CLI → graph-client
+## Step 7 — Boot identity → CLI → graph-client
 
 ```sh
 cd target-repo/identity && npm start
@@ -97,15 +130,15 @@ cd target-repo/cli && node dist/cli.js login --url http://localhost:<port>
 
 The CLI's first `<ns> login` round-trip exercises both halves of the substrate: identity issues a token, the CLI caches it under `~/.<ns>/credentials`, subsequent `<ns> grant` / `<ns> revoke` commands flow through.
 
-## Step 7 — Verify the substrate runs against PolyGraph
+## Step 8 — Verify the substrate runs against PolyGraph
 
 (Stage 3+ — the graph-client scaffold doesn't yet talk to PolyGraph. Until Stage 3 lands, this step is a placeholder: confirm PolyGraph is reachable from the substrate's host network, and reserve the graph URL in `.<ns>/config.yaml` as `<ns>.graphUrl`.)
 
-## Step 8 — Load the project's first archetype contracts into the SIG
+## Step 9 — Load the project's first archetype contracts into the SIG
 
 (Deferred to **Task 3** of the SIG-first pivot. The mechanics of "load a contract YAML and project it into PolyGraph as a subgraph" will be described there.)
 
-After Step 8, the adopter project is running on its own SI substrate. Subsequent archetype adoptions (events-spine, blackboard, etc.) express their contracts as additional SIG subgraphs.
+After Step 9, the adopter project is running on its own SI substrate. Subsequent archetype adoptions (events-spine, blackboard, etc.) express their contracts as additional SIG subgraphs. Run `<ns> agents completeness run` against the freshly-loaded SIG — expect every loaded contract's hypotheses to surface as `open` (info) until adoption verifies them.
 
 ## What the full recipe will add
 
