@@ -28,19 +28,37 @@ example); adopters override via their adopter-prefix env vars
 
 ## `seed-solution.ts`
 
-Seeds an adoption's Solution Intelligence Graph (SIG) root node in PolyGraph.
+Seeds an adoption's Solution Intelligence Graph (SIG) root node. **Backend-pluggable since Phase 3a-revised** — runs against Neo4j (default for asi) or PolyGraph (default for adopters that embed their own SIG, e.g. stores). Uses the same `SI_*` env-var precedence as `load-contracts.ts`, falling back to the legacy `ASI_*` names for the asi reference adoption.
 
 ```bash
-# Default (assumes constellation-neo4j is up on bolt://localhost:7689):
+# Default (Neo4j on constellation-neo4j when SI_BACKEND is unset and the
+# adopter resolved @adopt:default-backend to 'neo4j'):
 npx tsx scripts/seed-solution.ts
 
-# Custom Bolt URL / auth:
-ASI_GRAPH_URL=bolt://host:port \
-  ASI_GRAPH_USER=neo4j ASI_GRAPH_PASS=secret \
+# Custom Bolt URL / auth (Neo4j):
+SI_GRAPH_URL=bolt://host:port \
+  SI_GRAPH_USER=neo4j SI_GRAPH_PASS=secret \
+  npx tsx scripts/seed-solution.ts
+
+# PolyGraph (embedded leveldb at `./data/polygraph`):
+SI_BACKEND=polygraph SI_POLYGRAPH_PATH=data/polygraph \
   npx tsx scripts/seed-solution.ts
 ```
 
-**Idempotent.** Re-running clears any prior `adoptionId: "asi"` nodes and reseeds. Other namespaces are untouched.
+Env-var matrix:
+
+| Env var | Default | Notes |
+|---|---|---|
+| `SI_BACKEND` | `@adopt:default-backend` | `'neo4j'` or `'polygraph'`. Adopters resolve at template-substitution time. |
+| `SI_POLYGRAPH_PATH` | `@adopt:default-polygraph-path` | Required when `SI_BACKEND=polygraph`. |
+| `SI_NAMESPACE` | `@adopt:default-namespace` | Solution-root namespace tag. Legacy `ASI_NAMESPACE` accepted. |
+| `SI_GRAPH_URL` | `@adopt:default-graph-url` | Bolt URL. Neo4j only. Legacy `ASI_GRAPH_URL` accepted. |
+| `SI_GRAPH_USER` | `neo4j` | Neo4j only. Legacy `ASI_GRAPH_USER` accepted. |
+| `SI_GRAPH_PASS` | `@adopt:default-graph-pass` | Neo4j only. Legacy `ASI_GRAPH_PASS` accepted. |
+
+**Idempotent.** Re-running clears any prior `Solution` nodes with the configured `adoptionId` and reseeds. Other namespaces and other labels (e.g. `/code`-ontology nodes that happen to share the namespace tag) are untouched — the wipe is scoped to the `Solution` label.
+
+**Why selectBackend() then bypass it for writes:** `contract-loader/src/backends/select.ts` exposes a `Backend.query` surface tuned for the four cypher write patterns the contract-loader emits (Pattern A: contract-scoped wipe; Pattern B: bare CREATE; Pattern C: MATCH+CREATE+CREATE; Pattern D: anchor MERGE). The seed's `DETACH DELETE` on the `Solution` label and its `CREATE … RETURN` shape are outside that set, so the script uses `selectBackend()` as a connectivity probe (fail-fast on bad URL/path) and then routes the actual writes through `neo4j-driver` (for Neo4j) or `polygraph-db` (for PolyGraph, via dynamic import). `contract-loader/src/` stays unchanged.
 
 **What it creates:** exactly one node:
 
