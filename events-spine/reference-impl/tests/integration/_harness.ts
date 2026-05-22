@@ -238,7 +238,19 @@ export async function bootIntegrationHarness(): Promise<IntegrationHarness> {
  * Convenience: synchronous pre-flight check used by `describe.skipIf`
  * patterns so the integration tests skip cleanly when no NATS option
  * is available.
+ *
+ * On GitHub Actions runners (`process.env.CI === 'true'`) Docker is
+ * usually available but `docker run nats` can race past the readiness
+ * wait, surfacing a flaky red instead of a clean skip. When CI is set
+ * and no local NATS server is reachable, we treat this as "no NATS
+ * option available" and let the suite skip; adopters who want CI to
+ * exercise NATS must stand up a real server in their workflow.
+ *
+ * // Why: lifted from SI/I Stage 2d (the first adopter); having it
+ * // here means every subsequent adopter inherits the CI-aware skip
+ * // for free.
  */
 export function hasNatsOption(): boolean {
+  if (process.env.CI === 'true' && !hasLocalNatsServer()) return false;
   return hasLocalNatsServer() || hasDocker();
 }
