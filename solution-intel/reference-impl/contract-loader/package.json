@@ -1,7 +1,7 @@
 {
   "name": "@solution-intelligence/contract-loader",
-  "version": "0.1.0-pre",
-  "description": "Parses LEFT-BOOKEND.md files into graph payloads and commits archetype contracts to PolyGraph anchored to a Solution root. Reference implementation of the solution-intel archetype.",
+  "version": "0.2.0-pre",
+  "description": "Parses LEFT-BOOKEND.md files into graph payloads and commits archetype contracts to either Neo4j or PolyGraph anchored to a Solution root. Reference implementation of the solution-intel archetype. Default backend in this canonical archetype is PolyGraph.",
   "author": "William Fredricks",
   "license": "Apache-2.0",
   "repository": {
@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "neo4j-driver": "^5.27.0",
+    "polygraph-db": "^0.1.4",
     "yaml": "^2.6.1"
   },
   "devDependencies": {

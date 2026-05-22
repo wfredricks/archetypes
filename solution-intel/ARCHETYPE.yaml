@@ -31,7 +31,7 @@ reference_impl:
   # Stage 3 will add a graph path:
   #   - ./reference-impl/graph/    (pending: solution-intelligence-graph)
   in_tree_since: 2026-05-21
-  in_tree_commit_tag: solution-intel-reference-impl-2026-05-22b
+  in_tree_commit_tag: solution-intel-reference-impl-2026-05-22c
   in_tree_amendments:
     - tag: solution-intel-reference-impl-agents-2026-05-22
       added: ./reference-impl/agents/
@@ -41,6 +41,10 @@ reference_impl:
       refreshed: "./reference-impl/cli/ (Phase 1c - + commands/contracts.ts + commands/agents.ts; F1 status+verifiedAt render), ./reference-impl/identity/ (Phase 1a F4 tsconfig.eslint.json rootDir fix lifted)"
       harmonized: "Hypothesis.verifiedAt storage type — canonical wire type is ISO-8601 string at the contract-loader boundary"
       source: "wfredricks/archetypes-solution-intelligence @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60"
+    - tag: solution-intel-reference-impl-2026-05-22c
+      refreshed: "./reference-impl/contract-loader/ (Phase 1e — backend-pluggable adapter; PolyGraph default in the canonical archetype; new @adopt:default-backend marker; public function signatures unchanged)"
+      added: "src/backends/{types,select,neo4j-backend,polygraph-backend}.ts, tests/backends-differential.test.ts, polygraph-db@^0.1.4 dependency"
+      source: "wfredricks/archetypes-solution-intelligence @ commit 3dbc71a2110a3b6a7d5f5422488102c2a4daf4e8"
 
 adopters: []  # populated when the archetypes registry adopts solution-intel on itself
 

@@ -45,34 +45,50 @@ Headers go on every adapted source file, including tests. This is the audit trai
 
 ## Step 3 — Configure `contract-loader`
 
-As of the 2026-05-22b reference-impl tag the archetype ships a
-`contract-loader/` package (snapshot of the asi-profile package; lifted
-Phase 1c). It is the **single enforcement point** for the
-`Hypothesis.verifiedAt` storage type at the contract-loader boundary;
-canonical wire type is ISO-8601 string. Copy the directory the same
-way as Step 1 (`target-repo/contract-loader/`), then:
+As of the **2026-05-22c reference-impl tag (Phase 1e)** the archetype
+ships a backend-pluggable `contract-loader/` package. The same code
+works against either Neo4j or PolyGraph, selected per call via the
+options object. The default backend in the canonical archetype is
+**PolyGraph** (`polygraph-db@^0.1.4` embedded via `LevelAdapter`);
+adopters who already operate a Neo4j cluster flip the
+`@adopt:default-backend` marker to `'neo4j'`. Copy the directory the
+same way as Step 1 (`target-repo/contract-loader/`), then:
 
 1. Re-apply provenance JSDoc headers per Step 2 (note the lift tag:
-   `solution-intel-reference-impl-2026-05-22b`).
+   `solution-intel-reference-impl-2026-05-22c`).
 2. Answer the package's `@adopt:` markers as part of Step 4 below —
-   the package-level ones are `@adopt:default-graph-url`,
-   `@adopt:default-graph-user`, `@adopt:default-graph-pass`. The
-   namespace is supplied by callers (CLI flag, env var, or programmatic
-   option), not by the contract-loader itself.
-3. The contract-loader's surface is:
+   the package-level ones are:
+   - `@adopt:default-backend` (in `src/backends/types.ts`) — set to
+     `'polygraph'` for self-contained projects (the canonical default)
+     or `'neo4j'` for adopters with an existing Neo4j cluster.
+   - `@adopt:default-graph-url` / `-user` / `-pass` (in
+     `src/backends/neo4j-backend.ts`) — only consulted when the Neo4j
+     backend is selected.
+   The namespace is supplied by callers (CLI flag, env var, or
+   programmatic option), not by the contract-loader itself.
+   PolyGraph adopters supply `polygraphPath` per call (the leveldb
+   directory); there is no module-level default.
+3. The contract-loader's surface is unchanged from Phase 1c:
    - `parseBookend(path)` — LEFT-BOOKEND.md → in-memory `ContractGraph`.
    - `commitContract(graph, options)` — idempotent writer.
    - `verifyContract(…)`, `listContracts(…)`, `showContract(…)` — read helpers used by `<binary> contracts …`.
+   New (additive) option fields: `options.backend`, `options.polygraphPath`.
 4. The `cli/src/commands/contracts.ts` and the `BookendAuditAgent`
    both depend on this package. Update the adopter's package scope in
    `package.json` (`@solution-intelligence/contract-loader` → e.g.
    `@<adopter>/contract-loader`) and align the imports in the cli + agents
    packages accordingly.
+5. **Recommendation:** start with the PolyGraph default. It's
+   self-contained (no separate service to operate), boots from a
+   leveldb directory, and survives across CLI invocations. Switch to
+   Neo4j only when you need clustering, replication, or you're sharing
+   a SIG across multiple adoptions — the asi adoption is the canonical
+   example of the latter.
 
-The `verifiedAt` harmonization means downstream layers (cli, agents)
-see only `string | null` for that field. The agents package keeps a
-defensive `normalizeIsoString` belt-and-braces helper; you should not
-need to touch it, but leave it in place.
+The `verifiedAt` harmonization (from Phase 1c) means downstream layers
+(cli, agents) see only `string | null` for that field. The agents
+package keeps a defensive `normalizeIsoString` belt-and-braces helper;
+you should not need to touch it, but leave it in place.
 
 ## Step 3.b — Configure agents
 
@@ -114,8 +130,8 @@ grep -rn "@adopt:" target-repo/{identity,cli,graph-client,agents,contract-loader
 
 Two categories of marker appear:
 
-- **`@adopt:<key>`** — identity-and-deployment values (namespace, project-id, default-port, service-name, app-name, audit-log-path, grants-ledger-path, cli-binary-name, credentials-dir, project-config-path, default-endpoint-env-var, login-url, support-email, allowed-email-domains, auth-mount-path, event-subject-prefix, graph-endpoint, agent-name-completeness, agent-name-bookend-audit, default-namespace, default-graph-url, default-graph-user, default-graph-pass).
-- **`@adopt:composes:<role>`** — composition sites (identity, audit-ledger, eventing, graph).
+- **`@adopt:<key>`** — identity-and-deployment values (namespace, project-id, default-port, service-name, app-name, audit-log-path, grants-ledger-path, cli-binary-name, credentials-dir, project-config-path, default-endpoint-env-var, login-url, support-email, allowed-email-domains, auth-mount-path, event-subject-prefix, graph-endpoint, agent-name-completeness, agent-name-bookend-audit, default-namespace, **default-backend** _(Phase 1e; contract-loader storage selector)_, default-graph-url, default-graph-user, default-graph-pass).
+- **`@adopt:composes:<role>`** — composition sites (identity, audit-ledger, eventing, graph, **storage-backend**).
 
 Build a list. Answer the question in each marker before booting anything.
 

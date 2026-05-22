@@ -1,13 +1,4 @@
 /**
- * Provenance:
- *   Lifted into archetypes/solution-intel/reference-impl/ on 2026-05-22
- *   from wfredricks/archetypes-solution-intelligence/contract-loader/tests/parse-simple-auth.test.ts
- *   @ commit 195096307965d7ccd1a5ddac5da1b09db6b77b60.
- *
- *   Ownership: solution-intel canonical.
- */
-
-/**
  * Parser test against the (retroactive) simple-auth LEFT-BOOKEND.md.
  *
  * // Why: simple-auth's left bookend was lifted retroactively and is
