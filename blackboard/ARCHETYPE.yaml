@@ -1,0 +1,25 @@
+name: blackboard
+kind: composite
+description: >
+  Opportunistic multi-agent coordination over a shared structured workspace.
+  Hearsay-II's pattern, named for Declarative Software Development.
+  Knowledge Sources watch the workspace, contribute their piece on
+  recognition of patterns matching their expertise, and emit proposals
+  with confidence scores. A Control component opportunistically schedules
+  which Knowledge Source to invoke next. Supports transient (session-scoped)
+  and persistent (long-running understanding accumulation) modes.
+reference_languages:
+  primary: typescript
+  available_translations: []
+composes:
+  # Anticipated. Locked at first reference implementation.
+  - graph-db
+  - events-spine
+adopters: []  # populated when first adoption ships; code-explorer in solution-intel is the planned first target
+defects_known: []  # populated by first adoption findings
+status: stub-design-only
+status_note: >
+  Name reserved 2026-05-21; full design document THE-BLACKBOARD.md added
+  2026-05-22 evening. No library exists. First reference implementation
+  planned for code-explorer blackboard inside solution-intel's biz-deriver
+  phase. See docs/THE-BLACKBOARD.md for the architectural pattern.
